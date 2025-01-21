@@ -132,42 +132,50 @@ def inbox():
     cur.close()
     return render_template('inbox.html', fallas = insertObject)
 
-@app.route("/date", methods=['GET'])
-def date():
-    return render_template('date.html')
-
-
-
 
 # Funcion para buscar una falla filtrando por fecha
 @app.route("/date-filter", methods=['POST'])
 def dateFilter():
     fecha1 = request.form['fecha-1']
     fecha2 = request.form['fecha-2']
+    
+    cur = mysql.connection.cursor()
     if fecha1 and fecha2:
-        cur = mysql.connection.cursor()
         sql = "SELECT * FROM odt WHERE fecha BETWEEN %s AND %s"
         data = (fecha1, fecha2)
         cur.execute(sql, data)
-        fallas = cur.fetchall()
-        insertObject = []
-        columNamnes = [column[0] for column in cur.description]
-        for record in fallas:
-            insertObject.append(dict(zip(columNamnes, record)))
-        cur.close()
-        return render_template('date.html', fallas=insertObject)
     else:
-        # En caso de que no se proporcionen fechas, puedes mostrar todas las fallas
-        cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM odt")
-        fallas = cur.fetchall()
-        insertObject = []
-        columNamnes = [column[0] for column in cur.description]
-        for record in fallas:
-            insertObject.append(dict(zip(columNamnes, record)))
-        cur.close()
-        return render_template('inbox.html', fallas=insertObject)
 
+    fallas = cur.fetchall()
+    insertObject = []
+    columNamnes = [column[0] for column in cur.description]
+    for record in fallas:
+        insertObject.append(dict(zip(columNamnes, record)))
+    cur.close()
+
+    return render_template('inbox.html', fallas=insertObject)
+
+@app.route("/search", methods = ['POST'])
+def searchName():
+    tienda = request.form['tienda']
+    cur = mysql.connection.cursor()
+    if tienda:
+        sql = 'SELECT * FROM odt WHERE tienda = %s' 
+        data = (tienda,)
+        cur.execute(sql, data)
+    else:
+        cur.execute("SELECT * FROM odt")
+        
+
+    fallas = cur.fetchall()
+    insertObject = []
+    columNamnes = [column[0] for column in cur.description]
+    for record in fallas:
+        insertObject.append(dict(zip(columNamnes, record)))
+    cur.close()
+
+    return render_template('inbox.html', fallas=insertObject)
 
 
 
