@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/styles.css">
+    <title>Registrate</title>
+</head>
+<style>
+    .header{
+        display: none !important;
+    }
+</style>
+<body>
+
+    <header class="header">
+
+        <nav class="nav">
+            <div class="container-logo">
+                <img src="../static/images/logoSambil.png" alt="Logo" width="70px" height="70px">
+            </div>
+
+            <div class="container-logo">
+                <input type="search" placeholder="Busqueda por tienda...." class="search-input">
+            </div>
+
+            <ul class="nav-list">
+                <li class="nav-item"><a href="{{url_for('inbox')}}" class="nav-link">Inicio</a></li>
+                <li class="nav-item"><a href="{{url_for('reporteTiendas')}}" class="nav-link">Tiendas registradas</a></li>
+                <li class="nav-item"><a href="{{url_for('reporteFallas')}}" class="nav-link">reportes</a></li>
+                <li class="nav-item switch">
+                    <a class="btn nav-boton mr-2 " id="darkModeToggle" role="button">
+                        <i class="fas mb-2 mr-1 fa-moon theme-icon"></i>
+                      </a>
+                </li>
+                <li class="nav-item nav-item__drop">
+                        <div class="drop-menu">
+                            <ul class="drop-list">
+                                <li class="drop-item"><a href="{{url_for('editUser')}}" class="drop-link">Usuario</a></li>
+                                <li class="drop-item"><a href="{{url_for('logout')}}" class="drop-link">Cerrar sesion</a></li>
+                            </ul>
+                        </div>
+            </li>
+            </ul>
+        </nav>
+    </header>
+
+
+    <div class="regist__wrapper">
+        <div class="img-container">
+            <img class="sambil" src="../static/images/image003.png" alt="">
+        </div>
+        <form class="regist__form" action="/user_regist" method="post">
+            {% if message %}
+            <div class="alert">
+                {{message}}
+            </div>
+            {% endif %}
+            <div class="regist__form-container">
+                <label for="nombre">Nombre</label>
+                <input class="regist__form__input" type="text" placeholder="Nombre" id="Nombre" name="name">
+            </div>
+
+            <div class="regist__form-container">
+                <label for="apellido">Apellido</label>
+                <input class="regist__form__input" type="text" placeholder="Apellido" id="apelldio" name="surname">
+            </div>
+
+            <div class="regist__form-container form-select__container">
+                <label>Selecciona el tipo de usuario</label>
+                <select name="tipo-usuario" class="regist__form__input user-select">
+                    <option value=none>Selecciona</option>
+                  <option value="tienda">Tienda/local</option>
+                  <option value="sambil">Departamento de fallas</option>
+            </select>
+            </div>
+
+            <div class="regist__form-container tienda-container">
+                <label for="tienda">Tienda</label>
+                <input class="regist__form__input tienda-input" type="text" placeholder="Nike" id="tienda" name="tienda">
+            </div>
+
+            <div class="regist__form-container">
+                <label for="email">Email</label>
+                <input class="regist__form__input" type="email" placeholder="Email" id="email" name="email">
+            </div>
+
+              
+            <div class="regist__form-container">
+                <label for="contraseña">Contraseña</label>
+                <input class="regist__form__input" type="password" placeholder="Contraseña" id="contraseña" name="contraseña">
+            </div>
+
+            <div class="regist__form-container acces-container">
+                <label for="clave">Clave de acceso</label>
+                <input class="regist__form__input" type="password" placeholder="Clave de acceso" id="calve" name="clave">
+            </div>
+
+
+            <div class="regist__form-container btn-regist__container">
+                    <button type="submit" class="form__btn form__btn-regist">Registrame</button>
+            </div>
+
+            <div class="regist__form-container">
+                    <button type="submit" class="form__btn form__btn-login"><a class="btn-link" href="{{ url_for('home')}}">¿Ya tienes cuenta?</a></button>
+            </div>
+
+        </form>
+    </div>
+    <span>holi</span>
+
+    <script>
+        var areaSelect = document.querySelector('select[name="tipo-usuario"]');
+
+         // Obtener los select de tipo para cada área
+          var divTienda = document.querySelector('.tienda-container');
+          var divAcces = document.querySelector('.acces-container')
+
+          // Mostrar u ocultar el select de tipo según la opción seleccionada en 'Area'
+        areaSelect.addEventListener('change', function() {
+        // Ocultar todos los selects de tipo
+        divTienda.style.display = 'none';
+        divAcces.style.display = 'none';
+    
+        // Mostrar el select de tipo correspondiente a la opción seleccionada
+        var selectedArea = areaSelect.value;
+        if (selectedArea === 'tienda') {
+            divTienda.style.display = 'block';
+        }
+
+        else if (selectedArea === 'sambil') {
+            divAcces.style.display = 'block';
+        }
+    });
+    </script>
+    <script src="../static/js/darkMode.js"></script>
+</body>
+</html>

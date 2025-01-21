@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/styles.css">
+    <title>Editar usuario</title>
+</head>
+<body class="dark">
+
+    {% include 'header.html' %}
+
+    <div class="regist__wrapper">
+        <div class="img-container">
+            <img class="sambil" src="../static/images/image003.png" alt="">
+        </div>
+        <form class="regist__form" action="/edit-user" method="post">
+            {% if message %}
+            <div class="alert">
+                {{message}}
+            </div>
+            {% endif %}
+            <div class="regist__form-container">
+                <label for="nombre">Nombre</label>
+                <input class="regist__form__input" type="text" placeholder="Nombre" id="Nombre" name="name" 
+                value="{{session['name']}}">
+            </div>
+
+            <div class="regist__form-container">
+                <label for="apellido">Apellido</label>
+                <input class="regist__form__input" type="text" placeholder="Apellido" id="apelldio" name="surname" value="{{session['surname']}}">
+            </div>
+
+
+            <div class="regist__form-container">
+                <label for="email">Email</label>
+                <input class="regist__form__input" type="email" placeholder="Email" id="email" name="email" value="{{session['email']}}">
+            </div>
+
+              
+            <div class="regist__form-container">
+                <label for="contraseña">Contraseña Actual</label>
+                <input class="regist__form__input" type="password" placeholder="Contraseña" id="contraseña" name="contraseña_Act">
+            </div>
+
+            <div class="regist__form-container">
+                <label for="contraseña">Contraseña Nueva</label>
+                <input class="regist__form__input" type="password" placeholder="Contraseña" id="contraseña" name="contraseña">
+            </div>
+
+
+            <div class="regist__form-container btn-regist__container">
+                    <button type="submit" class="form__btn form__btn-regist">Editar</button>
+            </div>
+
+        </form>
+    </div>
+    <span>holi</span>
+
+    <script src="../static/js/darkMode.js"></script>
+</body>
+</html>
