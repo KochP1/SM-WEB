@@ -370,7 +370,7 @@ def deleteFalla():
 def forgot():
     return render_template('forgotPassword.html')
 
-
+# Funcion para verificar si el usuario existe en la abse de datos
 def verificar_email_en_bd(email):
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM login WHERE email = %s", (email,))
@@ -396,11 +396,12 @@ def forgotPassword():
     else:
         return render_template('forgotPassword.html', message = 'El correo electronico no esta registrado')
 
+# Template de recuperacion de usuario
 @app.route("/recovery", methods = ['GET'])
 def recovery():
     return render_template('recovery.html')
 
-
+# Funcion de recuperacion de usuario
 @app.route("/recovery-password", methods = ['POST'])
 def recoveryPassword():
     email = request.form['email']
