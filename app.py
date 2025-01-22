@@ -1,7 +1,6 @@
 from flask import Flask
 from flask import render_template, redirect, request, session, url_for
 from flask_mysqldb import MySQL
-from datetime import datetime
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 import pymysql
@@ -370,10 +369,18 @@ def deleteFalla():
 def forgot():
     return render_template('forgotPassword.html')
 
-# Funcion para verificar si el usuario existe en la abse de datos
+# Funcion para verificar si el usuario existe en la base de datos de usuarios sambil
 def verificar_email_en_bd(email):
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM login WHERE email = %s", (email,))
+    usuario = cur.fetchone()
+    cur.close()
+    return usuario is not None
+
+# Funcion para verificar si el usuario existe en la base de datos de usuarios tiendas
+def verificar_email_en_bd_tiendas(email):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM usuarios_tiendas WHERE email = %s", (email,))
     usuario = cur.fetchone()
     cur.close()
     return usuario is not None
@@ -393,8 +400,18 @@ def forgotPassword():
         msg.body = f'Para restablecer tu contraseña, haz clic en el siguiente enlace: {reset_url}'
         mail.send(msg)
         return render_template('forgotPassword.html', message_succes = 'REVISA TU GMAIL\n(Revisa tu bandeja de spam si no lo ves en el inbox)')
+    elif verificar_email_en_bd_tiendas(email):
+        token = serializer.dumps(email, salt='reset-password')
+        reset_url = url_for('recovery', token=token, _external=True)
+        msg = Message('Restablecer contraseña',
+                      sender='tu_correo_electronico',
+                      recipients=[email])
+        msg.body = f'Para restablecer tu contraseña, haz clic en el siguiente enlace: {reset_url}'
+        mail.send(msg)
+        return render_template('forgotPassword.html', message_succes = 'REVISA TU GMAIL\n(Revisa tu bandeja de spam si no lo ves en el inbox)')
     else:
         return render_template('forgotPassword.html', message = 'El correo electronico no esta registrado')
+    
 
 # Template de recuperacion de usuario
 @app.route("/recovery", methods = ['GET'])
@@ -411,6 +428,14 @@ def recoveryPassword():
     if verificar_email_en_bd(email) and newPassword == confirmPassword:
         cur = mysql.connection.cursor()
         sql = "UPDATE login SET contraseña = %s WHERE email = %s"
+        data = (newPassword, email)
+        cur.execute(sql, data)
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('home'))
+    elif verificar_email_en_bd_tiendas(email) and newPassword == confirmPassword:
+        cur = mysql.connection.cursor()
+        sql = "UPDATE usuarios_tiendas SET contraseña = %s WHERE email = %s"
         data = (newPassword, email)
         cur.execute(sql, data)
         mysql.connection.commit()
