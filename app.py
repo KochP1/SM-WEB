@@ -403,8 +403,22 @@ def recovery():
 
 @app.route("/recovery-password", methods = ['POST'])
 def recoveryPassword():
+    email = request.form['email']
     newPassword = request.form['newPassword']
     confirmPassword = request.form['confirmPassword']
+
+    if verificar_email_en_bd(email) and newPassword == confirmPassword:
+        cur = mysql.connection.cursor()
+        sql = "UPDATE login SET contraseña = %s WHERE email = %s"
+        data = (newPassword, email)
+        cur.execute(sql, data)
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('home'))
+    elif newPassword != confirmPassword:
+        return render_template('recovery.html', message = 'Las contraseña no coinciden')
+    else:
+        return render_template('recovery.html', message = 'El correo no esta registrado en la base de datos')
 
 
 # Cierre de sesion
