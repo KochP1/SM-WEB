@@ -386,7 +386,7 @@ def forgotPassword():
 
     if verificar_email_en_bd(email):
         token = serializer.dumps(email, salt='reset-password')
-        reset_url = url_for('home', token=token, _external=True)
+        reset_url = url_for('recovery', token=token, _external=True)
         msg = Message('Restablecer contraseña',
                       sender='tu_correo_electronico',
                       recipients=[email])
@@ -395,6 +395,16 @@ def forgotPassword():
         return render_template('forgotPassword.html', message_succes = 'REVISA TU GMAIL\n(Revisa tu bandeja de spam si no lo ves en el inbox)')
     else:
         return render_template('forgotPassword.html', message = 'El correo electronico no esta registrado')
+
+@app.route("/recovery", methods = ['GET'])
+def recovery():
+    return render_template('recovery.html')
+
+
+@app.route("/recovery-password", methods = ['POST'])
+def recoveryPassword():
+    newPassword = request.form['newPassword']
+    confirmPassword = request.form['confirmPassword']
 
 
 # Cierre de sesion
