@@ -2,6 +2,8 @@ from flask import Flask
 from flask import render_template, redirect, request, session, url_for
 from flask_mysqldb import MySQL
 from datetime import datetime
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
 import pymysql
 from werkzeug.security import generate_password_hash
 
@@ -19,6 +21,16 @@ app.config["MYSQL_DB"]="sm"
 #app.config["MYSQL_CURSORCLASS"]="dictCursor"
 mysql = MySQL(app)
 app.config["SECRET_KEY"] = "1145"  # Define la clave secreta antes de acceder a la sesión
+
+# Configuración de Flask-Mail y Serializer
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'juanandreskochp@gmail.com'
+app.config['MAIL_PASSWORD'] = 'nlyl open nvhv dtlg'
+app.config['MAIL_DEFAULT_SENDER'] = 'juanandreskochp@gmail.com'
+mail = Mail(app)
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 try:
     mysql.connection.ping(reconnect=True)
@@ -351,6 +363,38 @@ def deleteFalla():
     cur.execute(sql, data)
     mysql.connection.commit()
     return redirect(url_for('inbox'))
+
+# Template para olvidaste tu contrasena
+
+@app.route("/forgot", methods = ['GET'])
+def forgot():
+    return render_template('forgotPassword.html')
+
+
+def verificar_email_en_bd(email):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM login WHERE email = %s", (email,))
+    usuario = cur.fetchone()
+    cur.close()
+    return usuario is not None
+
+# Funcion para el envio del correo de recuperacion
+
+@app.route("/forgot-password", methods = ['POST'])
+def forgotPassword():
+    email = request.form['email']
+
+    if verificar_email_en_bd(email):
+        token = serializer.dumps(email, salt='reset-password')
+        reset_url = url_for('home', token=token, _external=True)
+        msg = Message('Restablecer contraseña',
+                      sender='tu_correo_electronico',
+                      recipients=[email])
+        msg.body = f'Para restablecer tu contraseña, haz clic en el siguiente enlace: {reset_url}'
+        mail.send(msg)
+        return 'Se ha enviado un correo con las instrucciones para restablecer la contraseña.'
+    return render_template('olvide_contrasena.html')
+
 
 # Cierre de sesion
 @app.route("/logout")
