@@ -392,8 +392,9 @@ def forgotPassword():
                       recipients=[email])
         msg.body = f'Para restablecer tu contraseña, haz clic en el siguiente enlace: {reset_url}'
         mail.send(msg)
-        return 'Se ha enviado un correo con las instrucciones para restablecer la contraseña.'
-    return render_template('olvide_contrasena.html')
+        return render_template('forgotPassword.html', message_succes = 'REVISA TU GMAIL\n(Revisa tu bandeja de spam si no lo ves en el inbox)')
+    else:
+        return render_template('forgotPassword.html', message = 'El correo electronico no esta registrado')
 
 
 # Cierre de sesion
