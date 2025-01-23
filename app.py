@@ -10,12 +10,21 @@ from werkzeug.security import generate_password_hash
 # INICIALIZACION DE LA APLICACION FLASK
 app = Flask(__name__, template_folder="templates")
 
+"""
+app.config['MYSQL_HOST'] = 'roundhouse.proxy.rlwy.net'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'zpghwZJfGhDNAuUSCjxLxfGwXgayuZpO'
+app.config['MYSQL_DB'] = 'railway'
+
+"""
+
 # CONEXION A LA BASE DE DATOS
 
 app.config["MYSQL_HOST"]="localhost"
 app.config["MYSQL_USER"]="root"
 app.config["MYSQL_PASSWORD"]="Sambil121267"
 app.config["MYSQL_DB"]="sm"
+
 
 #app.config["MYSQL_CURSORCLASS"]="dictCursor"
 mysql = MySQL(app)
@@ -31,8 +40,10 @@ app.config['MAIL_DEFAULT_SENDER'] = 'juanandreskochp@gmail.com'
 mail = Mail(app)
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
+app.app_context().push()
+
 try:
-    mysql.connection.ping(reconnect=True)
+    mysql.connection.ping(True)
     print("Conexión exitosa a la base de datos")
 except Exception as e:
     print("Error al conectar a la base de datos:", e)

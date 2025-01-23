@@ -177,6 +177,95 @@ input[type="search"]::-webkit-search-cancel-button {
     color: red; /* Cambiar el color a rojo, puedes ajustar el color según tus necesidades */
 }
 
+.sidebar{
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 250px;
+    z-index: 999;
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    box-shadow: -10px 0 10px rgba(0, 0, 0, 0.1);
+    display: none;
+    flex-direction: column;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 10px;
+}
+
+
+.sidebar li{
+    width: 100%;
+    list-style: none;
+    text-align: left; /* Añade esta propiedad para alinear el texto a la izquierda */
+    padding-left: 0
+}
+
+.sidebar li a{
+    width: 100%;
+    color: #ffffff;
+    text-decoration: none;
+    text-align: left;
+}
+
+
+
+.user-container{
+    color: #fff;
+    background-color: red;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    font-size: 1.5rem;
+    text-align: center;
+    margin-left: 20px;
+}
+
+.user-container a{
+    text-decoration: none;
+    color: #fff;
+}
+
+.toggle-button__list{
+    display: none;
+    list-style: none;
+    margin-left: auto;
+    align-items: center;
+}
+
+.menu-button i{
+    margin-top: 25px;
+}
+
+.switch__mobile a{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.side-item:last-child{
+    display: flex;
+    flex-direction: row;
+    justify-content: left !important;
+    border: 1px solid #fff;
+}
+
+.container-logo{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    margin-left: 10px;
+}
+
+.container-logo img{
+    width: 40px;
+    height: 40px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+
 
 
 /* INBOX */
@@ -376,9 +465,42 @@ body.dark-mode {
 
 }
 
+.menu-button.dark-mode{
+    color: #ffffff !important;
+}
 
 
-@media (min-width:970px) {
+@media(max-width: 959px) {
+    .nav-item{
+        display: none !important;
+    }
+
+    .toggle-button__list{
+        display: flex;
+    }
+}
+
+@media(max-width: 400px) {
+    .sidebar{
+        width: 100%;
+    }
+
+    .mobile__search-input{
+        font-size: 0.8rem !important;
+        margin-right: 10px;
+    }
+}
+
+@media(max-width: 990px) {
+
+    .mobile__search-input{
+        font-size: 1rem;
+    }
+}
+
+
+
+@media (min-width:960px) {
       /* Header */
 
 
@@ -395,6 +517,9 @@ body.dark-mode {
     }
 
     .container-logo{
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
         margin-left: 20px;
     }
 
@@ -412,22 +537,6 @@ body.dark-mode {
     .nav-link{
         color: #000;
         text-decoration: none;
-    }
-
-    .user-container{
-        color: #fff;
-        background-color: red;
-        border-radius: 50%;
-        width: 35px;
-        height: 35px;
-        font-size: 1.5rem;
-        text-align: center;
-        margin-left: 20px;
-    }
-
-    .user-container a{
-        text-decoration: none;
-        color: #fff;
     }
 
     /* drop down menu de usuario */

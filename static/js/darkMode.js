@@ -76,6 +76,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const modalb  = document.querySelectorAll(".form-control");
         modalb.forEach(modal => modal.classList.add("dark-mode"));
 
+        const menuButton  = document.querySelectorAll(".menu-button");
+        menuButton.forEach(button => button.classList.add("dark-mode"));
+
 
 
     }
@@ -137,6 +140,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const modalb  = document.querySelectorAll(".form-control");
         modalb.forEach(modal => modal.classList.remove("dark-mode"));
+
+        const menuButton  = document.querySelectorAll(".menu-button");
+        menuButton.forEach(button => button.classList.remove("dark-mode"));
 
 
     }
