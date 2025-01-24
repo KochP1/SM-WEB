@@ -35,32 +35,24 @@ db = pymysql.connect(
     port=30481,
     user='root',
     password='YRyowWnclqRtxerAfrQBndKOVcyauzzG',
-    database='railway'
+    database='sm'
 )
 app.config["SECRET_KEY"] = "1145"  # Define la clave secreta antes de acceder a la sesión
 
 # Función para verificar si la conexión a la base de datos es exitosa
-def test_db_connection():
-    try:
+
+try:
         with db.cursor() as cursor:
             # Ejecutar una consulta sencilla para comprobar la conexión
             cursor.execute("SELECT 1")
             result = cursor.fetchone()
             if result:
-                return True
+                print("Conexion")
             else:
-                return False
-    except pymysql.Error as e:
+                print("error")
+except pymysql.Error as e:
         print(f"Error al conectar a la base de datos: {e}")
-        return False
 
-# Ruta de prueba para verificar la conexión a la base de datos
-@app.route("/test_db_connection")
-def test_connection():
-    if test_db_connection():
-        return "¡La conexión a la base de datos es exitosa!"
-    else:
-        return "¡Error al conectar a la base de datos!"
 
 # Configuración de Flask-Mail y Serializer
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -108,7 +100,6 @@ def login():
         return redirect(url_for('inbox'))
     
     # Inicio de sesion para los usuarios de las tiendas
-    
     cur.execute("SELECT * FROM usuarios_tiendas WHERE email = %s AND contraseña = %s", (email, contraseña))
     user = cur.fetchone()
 
@@ -121,6 +112,7 @@ def login():
         session['contraseña'] = user[5]
         cur.close()
         return redirect(url_for('tiendasUI'))
+    
     else:
         return render_template('index.html', message="Las credenciales no son correctas")
     
