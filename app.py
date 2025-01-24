@@ -30,7 +30,13 @@ app.config["MYSQL_DB"]="sm"
 #app.config["MYSQL_CURSORCLASS"]="dictCursor"
 #mysql = MySQL(app)
 
-db = pymysql.connect(host="localhost", port=3306, user="root", passwd="Sambil121267", database="sm")
+db = pymysql.connect(
+    host='junction.proxy.rlwy.net',
+    port=30481,
+    user='root',
+    password='YRyowWnclqRtxerAfrQBndKOVcyauzzG',
+    database='railway'
+)
 app.config["SECRET_KEY"] = "1145"  # Define la clave secreta antes de acceder a la sesión
 
 # Función para verificar si la conexión a la base de datos es exitosa
