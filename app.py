@@ -2,7 +2,8 @@ from flask import Flask
 from flask import render_template, redirect, request, session, url_for
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
-from flask_mysqldb import MySQL
+import pymysql
+import pymysql.cursors
 from werkzeug.security import generate_password_hash
 
 
@@ -18,16 +19,42 @@ app.config['MYSQL_DB'] = 'railway'
 """
 
 # CONEXION A LA BASE DE DATOS
-
+"""
 app.config["MYSQL_HOST"]="localhost"
 app.config["MYSQL_USER"]="root"
 app.config["MYSQL_PASSWORD"]="Sambil121267"
 app.config["MYSQL_DB"]="sm"
+"""
 
 
 #app.config["MYSQL_CURSORCLASS"]="dictCursor"
-mysql = MySQL(app)
+#mysql = MySQL(app)
+
+db = pymysql.connect(host="localhost", port=3306, user="root", passwd="Sambil121267", database="sm")
 app.config["SECRET_KEY"] = "1145"  # Define la clave secreta antes de acceder a la sesión
+
+# Función para verificar si la conexión a la base de datos es exitosa
+def test_db_connection():
+    try:
+        with db.cursor() as cursor:
+            # Ejecutar una consulta sencilla para comprobar la conexión
+            cursor.execute("SELECT 1")
+            result = cursor.fetchone()
+            if result:
+                return True
+            else:
+                return False
+    except pymysql.Error as e:
+        print(f"Error al conectar a la base de datos: {e}")
+        return False
+
+# Ruta de prueba para verificar la conexión a la base de datos
+@app.route("/test_db_connection")
+def test_connection():
+    if test_db_connection():
+        return "¡La conexión a la base de datos es exitosa!"
+    else:
+        return "¡Error al conectar a la base de datos!"
 
 # Configuración de Flask-Mail y Serializer
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -41,11 +68,7 @@ serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 app.app_context().push()
 
-try:
-    mysql.connection.ping(True)
-    print("Conexión exitosa a la base de datos")
-except Exception as e:
-    print("Error al conectar a la base de datos:", e)
+
 
 
 
@@ -65,7 +88,7 @@ def login():
     contraseña = request.form['contraseña']
     
 
-    cur = mysql.connection.cursor()
+    cur = db.cursor()
     cur.execute("SELECT * FROM login WHERE email = %s AND contraseña = %s", (email, contraseña))
     user = cur.fetchone()
 
@@ -126,14 +149,14 @@ def userRegist():
       else:
         return redirect(url_for('regist', message='Debe escoger el tipo de usuario'))
 
-      cur = mysql.connection.cursor()
+      cur = db.cursor()
       cur.execute(sql, data)
-      mysql.connection.commit()
+      db.commit()
       cur.close()  # Cerrar el cursor después de ejecutar la consulta
 
       return render_template('index.html')
 
-    except mysql.Error as e:
+    except db.Error as e:
       messageSql = 'Error SQL: {}'.format(str(e))
       return messageSql
     
@@ -143,7 +166,7 @@ def userRegist():
 # Template del inbox para el departamento de fallas 
 @app.route("/inbox", methods=['GET'])
 def inbox():
-    cur = mysql.connection.cursor()
+    cur = db.cursor()
     cur.execute("SELECT * FROM odt")
     fallas = cur.fetchall()
     insertObject = []
@@ -160,7 +183,7 @@ def dateFilter():
     fecha1 = request.form['fecha-1']
     fecha2 = request.form['fecha-2']
     
-    cur = mysql.connection.cursor()
+    cur = db.cursor()
     if fecha1 and fecha2:
         sql = "SELECT * FROM odt WHERE fecha BETWEEN %s AND %s"
         data = (fecha1, fecha2)
@@ -180,7 +203,7 @@ def dateFilter():
 @app.route("/search", methods = ['POST'])
 def searchName():
     tienda = request.form['tienda']
-    cur = mysql.connection.cursor()
+    cur = db.cursor()
     if tienda:
         sql = 'SELECT * FROM odt WHERE tienda = %s' 
         data = (tienda,)
@@ -214,11 +237,11 @@ def editFalla():
     idFalla = request.form['id']
 
     if name and surname and tienda and area and tipo and descripcion and fecha:
-        cur = mysql.connection.cursor()
+        cur = db.cursor()
         sql = 'UPDATE odt SET name = %s, surname = %s, tienda = %s, area = %s, tipo = %s, descripcion = %s, fecha = %s WHERE id = %s'
         data = (name, surname, tienda, area, tipo, descripcion, fecha, idFalla)
         cur.execute(sql, data)
-        mysql.connection.commit()
+        db.commit()
         cur.close()
     return redirect(url_for('inbox'))
 
@@ -242,19 +265,19 @@ def editUsers():
     cont = request.form['contraseña']
 
     if name and surname and email and cont and contAct == session['contraseña']:
-        cur = mysql.connection.cursor()
+        cur = cur = db.cursor()
         sql = "UPDATE login SET name = %s, surname = %s, email = %s, contraseña = %s WHERE id = %s"
         data = (name, surname, email, cont, ID)
         cur.execute(sql, data)
-        mysql.connection.commit()
+        db.commit()
         cur.close()
         return redirect(url_for('home'))
     elif name and surname and email:
-        cur = mysql.connection.cursor()
+        cur = db.cursor()
         sql = "UPDATE login SET name = %s, surname = %s, email = %s WHERE id = %s"
         data = (name, surname, email, ID)
         cur.execute(sql, data)
-        mysql.connection.commit()
+        db.commit()
         cur.close()
         return redirect(url_for('home'))
     else:
@@ -264,7 +287,7 @@ def editUsers():
 
 @app.route("/reporte-fallas", methods = ['GET'])
 def reporteFallas():
-    cur = mysql.connection.cursor()
+    cur = db.cursor()
     cur.execute("SELECT * FROM odt")
     fallas = cur.fetchall()
     insertObject = []
@@ -278,7 +301,7 @@ def reporteFallas():
 
 @app.route("/reporte-tiendas", methods = ['GET'])
 def reporteTiendas():
-    cur = mysql.connection.cursor()
+    cur = db.cursor()
     cur.execute("SELECT * FROM usuarios_tiendas")
     tiendas = cur.fetchall()
     insertObject = []
@@ -295,7 +318,7 @@ def reporteTiendas():
 @app.route("/tiendasUI", methods=['GET'])
 def tiendasUI():
     email = session['email']
-    cur = mysql.connection.cursor()
+    cur = db.cursor()
     cur.execute("SELECT * FROM odt WHERE email = %s", [email])
     fallas = cur.fetchall()
 
@@ -321,11 +344,11 @@ def newFalla():
     fecha = request.form['fecha']
 
     if tienda and area and tipo and descripcion and fecha:
-        cur = mysql.connection.cursor()
+        cur = db.cursor()
         sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
         data = (email, name, surname, tienda, area, tipo, descripcion, fecha)
         cur.execute(sql, data)
-        mysql.connection.commit()
+        db.commit()
     return redirect(url_for('tiendasUI'))
 
 
@@ -350,11 +373,11 @@ def editUsersTiendasFunc():
     
     if name and surname and tienda and email:
       if cont_act == session['contraseña']:
-         cur = mysql.connection.cursor()
+         cur = db.cursor()
          sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s, contraseña = %s WHERE idTiendas = %s"
          data = (name, surname, tienda, email, cont, idTiendas)
          cur.execute(sql, data)
-         mysql.connection.commit()
+         db.commit()
          cur.close()
          return redirect(url_for('home'))
       else:
@@ -365,12 +388,12 @@ def editUsersTiendasFunc():
 # Eliminar falla
 @app.route("/delete-falla", methods=['POST'])
 def deleteFalla():
-    cur = mysql.connection.cursor()
+    cur = db.cursor()
     id = request.form['id']
     sql = "DELETE FROM odt WHERE id = %s"
     data = (id,)
     cur.execute(sql, data)
-    mysql.connection.commit()
+    db.commit
     return redirect(url_for('inbox'))
 
 # Template para olvidaste tu contrasena
@@ -381,7 +404,7 @@ def forgot():
 
 # Funcion para verificar si el usuario existe en la base de datos de usuarios sambil
 def verificar_email_en_bd(email):
-    cur = mysql.connection.cursor()
+    cur = db.cursor()
     cur.execute("SELECT * FROM login WHERE email = %s", (email,))
     usuario = cur.fetchone()
     cur.close()
@@ -389,7 +412,7 @@ def verificar_email_en_bd(email):
 
 # Funcion para verificar si el usuario existe en la base de datos de usuarios tiendas
 def verificar_email_en_bd_tiendas(email):
-    cur = mysql.connection.cursor()
+    cur = db.cursor()
     cur.execute("SELECT * FROM usuarios_tiendas WHERE email = %s", (email,))
     usuario = cur.fetchone()
     cur.close()
@@ -436,19 +459,19 @@ def recoveryPassword():
     confirmPassword = request.form['confirmPassword']
 
     if verificar_email_en_bd(email) and newPassword == confirmPassword:
-        cur = mysql.connection.cursor()
+        cur = cur = db.cursor()
         sql = "UPDATE login SET contraseña = %s WHERE email = %s"
         data = (newPassword, email)
         cur.execute(sql, data)
-        mysql.connection.commit()
+        db.commit()
         cur.close()
         return redirect(url_for('home'))
     elif verificar_email_en_bd_tiendas(email) and newPassword == confirmPassword:
-        cur = mysql.connection.cursor()
+        cur = db.cursor()
         sql = "UPDATE usuarios_tiendas SET contraseña = %s WHERE email = %s"
         data = (newPassword, email)
         cur.execute(sql, data)
-        mysql.connection.commit()
+        db.commit()
         cur.close()
         return redirect(url_for('home'))
     elif newPassword != confirmPassword:
