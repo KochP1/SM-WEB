@@ -1,10 +1,9 @@
 from flask import Flask
 from flask import render_template, redirect, request, session, url_for
-from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
+from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash
-import pymysql
 
 
 # INICIALIZACION DE LA APLICACION FLASK
@@ -28,23 +27,6 @@ app.config["MYSQL_DB"]="sm"
 
 #app.config["MYSQL_CURSORCLASS"]="dictCursor"
 mysql = MySQL(app)
-# Crear una conexión con PyMySQL
-connection = pymysql.connect(
-    host=app.config["MYSQL_HOST"],
-    user=app.config["MYSQL_USER"],
-    password=app.config["MYSQL_PASSWORD"],
-    db=app.config["MYSQL_DB"],
-    cursorclass=pymysql.cursors.DictCursor
-)
-
-# Comprobar la conexión
-try:
-    with connection.cursor() as cursor:
-        print("Conexión exitosa a la base de datos")
-except Exception as e:
-    print("Error al conectar a la base de datos:", e)
-finally:
-    connection.close()
 app.config["SECRET_KEY"] = "1145"  # Define la clave secreta antes de acceder a la sesión
 
 # Configuración de Flask-Mail y Serializer
