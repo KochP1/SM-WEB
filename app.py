@@ -3,7 +3,6 @@ from flask import render_template, redirect, request, session, url_for
 from flask_mysqldb import MySQL
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
-import pymysql
 from werkzeug.security import generate_password_hash
 
 
@@ -134,7 +133,7 @@ def userRegist():
 
       return render_template('index.html')
 
-    except pymysql.Error as e:
+    except mysql.Error as e:
       messageSql = 'Error SQL: {}'.format(str(e))
       return messageSql
     
