@@ -82,6 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const select  = document.querySelectorAll(".select");
         select.forEach(select => select.classList.add("dark-mode"));
 
+        const dropList  = document.querySelectorAll(".drop-menu");
+        dropList.forEach(dropList => dropList.classList.add("dark-mode"));
+
 
 
     }
@@ -149,6 +152,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const select  = document.querySelectorAll(".select");
         select.forEach(select => select.classList.remove("dark-mode"));
+
+        const dropList  = document.querySelectorAll(".drop-menu");
+        dropList.forEach(dropList => dropList.classList.remove("dark-mode"));
 
 
     }
@@ -236,6 +242,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const menuButton  = document.querySelectorAll(".menu-button");
         menuButton.forEach(button => button.classList.add("dark-mode"));
 
+        const select  = document.querySelectorAll(".select");
+        select.forEach(select => select.classList.add("dark-mode"));
+
+        const side  = document.querySelectorAll(".sidebar");
+        side.forEach(side => side.classList.add("dark-mode"));
+
 
 
     }
@@ -300,6 +312,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const menuButton  = document.querySelectorAll(".menu-button");
         menuButton.forEach(button => button.classList.remove("dark-mode"));
+
+        const select  = document.querySelectorAll(".select");
+        select.forEach(select => select.classList.remove("dark-mode"));
+
+        const side  = document.querySelectorAll(".sidebar");
+        side.forEach(side => side.classList.remove("dark-mode"));
 
 
     }

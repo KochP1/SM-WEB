@@ -204,9 +204,13 @@ input[type="search"]::-webkit-search-cancel-button {
 
 .sidebar li a{
     width: 100%;
-    color: #ffffff;
+    color: #000;
     text-decoration: none;
     text-align: left;
+}
+
+.user-icon{
+    color: #ffffff !important;
 }
 
 
@@ -248,7 +252,6 @@ input[type="search"]::-webkit-search-cancel-button {
     display: flex;
     flex-direction: row;
     justify-content: left !important;
-    border: 1px solid #fff;
 }
 
 .container-logo{
@@ -472,6 +475,20 @@ body.dark-mode {
 .select.dark-mode option{
     color: #ffffff !important;
     background-color: #333 !important;
+}
+
+.sidebar.dark-mode li a{
+    color: #ffffff;
+}
+
+.drop-menu.dark-mode{
+    background-color: #333;
+    color: #ffffff;
+}
+
+.drop-menu.dark-mode ul li a{
+    background-color: #333;
+    color: #ffffff;
 }
 
 
