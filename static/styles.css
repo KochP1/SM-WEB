@@ -469,6 +469,11 @@ body.dark-mode {
     color: #ffffff !important;
 }
 
+.select.dark-mode option{
+    color: #ffffff !important;
+    background-color: #333 !important;
+}
+
 
 @media(max-width: 959px) {
     .nav-item{

@@ -75,17 +75,17 @@
         </div>
         <div class="modal-body">
           <form action="/new-falla" method="post">
-            <label>Nombre de la tienda</label>
+            <label>Nombre</label>
             <div class="form-control mb-3" name="name">{{session['name']}}</div>
 
-            <label>Nombre de la tienda</label>
+            <label>Apellido</label>
             <div class="form-control mb-3" name="surname">{{session['surname']}}</div>
 
             <label>Nombre de la tienda</label>
             <div class="form-control mb-3" name="tienda">{{session['tienda']}}</div>
 
             <label>Selecciona el Area</label>
-            <select name="area" class="form-control mb-3">
+            <select name="area" class="form-control mb-3 select">
                 <option value= none>Selecciona un area</option>
                 <option value="Electrica">Electrica</option>
                 <option value="Plomeria">Plomeria</option>
@@ -94,7 +94,7 @@
             </select>
 
             <label class="label-tipo">Selecciona el tipo de falla</label>
-            <select name="tipo" class=" form-control mb-3">
+            <select name="tipo" class=" form-control mb-3 select">
                 <option value= none>Selecciona un tipo</option>
                 <option value="Cambio de iluminacion" class="tipo-electrico option">Cambio de iluminacion</option>
                 <option value="Tomacorriente" class="tipo-electrico2 option">Tomacorriente</option>

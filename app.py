@@ -78,7 +78,21 @@ def login():
             session['id'] = user[0]
             session['email'] = email
             session['name'] = user[1]
+            session['surname'] = user[2]
+            session['contraseña'] =  contraseña
             return redirect(url_for('inbox'))
+
+        cur.execute("SELECT * FROM usuarios_tiendas WHERE email = %s", (email,))
+        user = cur.fetchone()
+        if user is not None:
+            session['id'] = user[0]
+            session['email'] = email
+            session['name'] = user[1]
+            session['surname'] = user[2]
+            session['contraseña'] =  contraseña
+            session['tienda'] = user[3]
+            print(session['tienda'])
+            return redirect(url_for('tiendasUI'))
         else:
             return render_template('index.html', message="Las credenciales no son correctas")
     

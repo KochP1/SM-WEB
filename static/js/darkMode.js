@@ -79,6 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const menuButton  = document.querySelectorAll(".menu-button");
         menuButton.forEach(button => button.classList.add("dark-mode"));
 
+        const select  = document.querySelectorAll(".select");
+        select.forEach(select => select.classList.add("dark-mode"));
+
 
 
     }
@@ -143,6 +146,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const menuButton  = document.querySelectorAll(".menu-button");
         menuButton.forEach(button => button.classList.remove("dark-mode"));
+
+        const select  = document.querySelectorAll(".select");
+        select.forEach(select => select.classList.remove("dark-mode"));
 
 
     }
