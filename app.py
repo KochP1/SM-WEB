@@ -10,23 +10,6 @@ from werkzeug.security import generate_password_hash
 # INICIALIZACION DE LA APLICACION FLASK
 app = Flask(__name__, template_folder="templates")
 
-"""
-app.config['MYSQL_HOST'] = 'roundhouse.proxy.rlwy.net'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'zpghwZJfGhDNAuUSCjxLxfGwXgayuZpO'
-app.config['MYSQL_DB'] = 'railway'
-
-"""
-
-# CONEXION A LA BASE DE DATOS
-"""
-app.config["MYSQL_HOST"]="localhost"
-app.config["MYSQL_USER"]="root"
-app.config["MYSQL_PASSWORD"]="Sambil121267"
-app.config["MYSQL_DB"]="sm"
-"""
-
-
 #app.config["MYSQL_CURSORCLASS"]="dictCursor"
 #mysql = MySQL(app)
 
@@ -84,37 +67,20 @@ def login():
     # INICIO DE SESION
     email = request.form['email']
     contraseña = request.form['contraseña']
-    
 
-    cur = db.cursor()
-    cur.execute("SELECT * FROM login WHERE email = %s AND contraseña = %s", (email, contraseña))
-    user = cur.fetchone()
+    if email and contraseña:
+        cur = db.cursor()
+        #cur.execute("SELECT * FROM login WHERE email = %s AND contraseña = %s", (email, contraseña))
+        cur.execute("SELECT * FROM login WHERE email = %s", (email,))
+        user = cur.fetchone()
 
-    if user is not None:
-        session['id'] = user[0]
-        session['email'] = email
-        session['name'] = user[1]
-        session['surname'] = user[2]
-        session['contraseña'] = user[4]
-        cur.close()
-        return redirect(url_for('inbox'))
-    
-    # Inicio de sesion para los usuarios de las tiendas
-    cur.execute("SELECT * FROM usuarios_tiendas WHERE email = %s AND contraseña = %s", (email, contraseña))
-    user = cur.fetchone()
-
-    if user is not None:
-        session['idTiendas'] = user[0]
-        session['email'] = email
-        session['name'] = user[1]
-        session['surname'] = user[2]
-        session['tienda'] = user[3]
-        session['contraseña'] = user[5]
-        cur.close()
-        return redirect(url_for('tiendasUI'))
-    
-    else:
-        return render_template('index.html', message="Las credenciales no son correctas")
+        if user is not None:
+            session['id'] = user[0]
+            session['email'] = email
+            session['name'] = user[1]
+            return redirect(url_for('inbox'))
+        else:
+            return render_template('index.html', message="Las credenciales no son correctas")
     
 
 
