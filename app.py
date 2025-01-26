@@ -76,6 +76,7 @@ def login():
             session['email'] = email
             session['name'] = user[1]
             session['surname'] = user[2]
+            session['contraseña'] = user[4]
             return redirect(url_for('inbox'))
         
         cur.execute("SELECT * FROM usuarios_tiendas WHERE email = %s", (email,))
@@ -87,6 +88,7 @@ def login():
             session['name'] = user[1]
             session['surname'] = user[2]
             session['tienda'] = user[3]
+            session['contraseña'] = user[5]
             return redirect(url_for('tiendasUI'))
         
     return render_template('index.html', message="Las credenciales no son correctas")
@@ -268,29 +270,30 @@ def editUsers():
     email = request.form['email']
     contAct = request.form['contraseña_Act']
     cont = request.form['contraseña']
+    cont_hash = generate_password_hash(cont, method='scrypt')
+    print(session['contraseña'])
     if len(cont) > 12:
         return render_template('editUser.html', message = 'La contraseña tiene un maximo de 12 caracteres')
 
     try:
-
-     if name and surname and email and cont and contAct == session['contraseña']:
-        cur = cur = db.cursor()
-        sql = "UPDATE login SET name = %s, surname = %s, email = %s, contraseña = %s WHERE id = %s"
-        data = (name, surname, email, cont, ID)
-        cur.execute(sql, data)
-        db.commit()
-        cur.close()
-        return redirect(url_for('home'))
-     elif name and surname and email:
-        cur = db.cursor()
-        sql = "UPDATE login SET name = %s, surname = %s, email = %s WHERE id = %s"
-        data = (name, surname, email, ID)
-        cur.execute(sql, data)
-        db.commit()
-        cur.close()
-        return redirect(url_for('home'))
-     else:
-        return redirect(url_for('editUser', message = "Las contrasenas no coinciden"))
+        if name and surname and email:
+            if check_password_hash(session['contraseña'], contAct):
+                cur = db.cursor()
+                sql = "UPDATE login SET name = %s, surname = %s, email = %s, contraseña = %s WHERE id = %s"
+                data = (name, surname, email, cont_hash, ID)
+                cur.execute(sql, data)
+                db.commit()
+                return redirect(url_for('home'))
+            else:
+                return render_template('editUser.html', message="La contraseña es incorrecta")
+        else:
+            cur = db.cursor()
+            sql = "UPDATE login SET name = %s, surname = %s, email = %s WHERE id = %s"
+            data = (name, surname, email, ID)
+            cur.execute(sql, data)
+            db.commit()
+            cur.close()
+            return redirect(url_for('home'))
     except pymysql.Error as e:
         error_message = "Error de MySQL al ejecutar la consulta: {}".format(e)
 
@@ -401,32 +404,45 @@ def editUserTiendas():
 
 
 # Funcion para editar usuarios de las tiendas
-@app.route("/edit-user-tiendas", methods = ['POST'])
+@app.route("/edit-user-tiendas", methods=['POST'])
 def editUsersTiendasFunc():
     idTiendas = request.form['id']
     name = request.form['name']
     surname = request.form['surname']
     tienda = request.form['tienda']
     email = request.form['email']
-    cont_act = request.form['contraseña_Act']           
+    contAct = request.form['contraseña_Act']
     cont = request.form['contraseña']
+    cont_hash = generate_password_hash(cont, method='scrypt')
+    
     if len(cont) > 12:
-        return render_template('editUserTiendas.html', message = 'La contraseña tiene un maximo de 12 caracteres')
+        return render_template('editUserTiendas.html', message='La contraseña tiene un máximo de 12 caracteres')
 
     try:
-     if name and surname and tienda and email:
-       if cont_act == session['contraseña']:
-          cur = db.cursor()
-          sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s, contraseña = %s WHERE idTiendas = %s"
-          data = (name, surname, tienda, email, cont, idTiendas)
-          cur.execute(sql, data)
-          db.commit()
-          cur.close()
-          return redirect(url_for('home'))
-       else:
-          return redirect(url_for('editUserTiendas'), message='Contraseña incorrecta')
-     else:
-        return redirect(url_for('editUserTiendas'), message='Los campos Nombre, apellido y Email no deben estar vacíos')
+        print("Datos recibidos:", idTiendas, name, surname, tienda, email, contAct, cont, cont_hash)
+        if name and surname and email and tienda and cont and contAct:
+            if check_password_hash(session['contraseña'], contAct):
+                cur = db.cursor()
+                sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s, contraseña = %s WHERE idTiendas = %s"
+                data = (name, surname, tienda, email, cont_hash, idTiendas)
+                cur.execute(sql, data)
+                datos = cur.fetchall()
+                print(datos)
+                db.commit()
+                return redirect(url_for('home'))
+            else:
+                return render_template('editUserTiendas.html', message="La contraseña es incorrecta")
+        elif name and surname and email and tienda:
+            cur = db.cursor()
+            sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s WHERE idTiendas = %s"
+            data = (name, surname, tienda, email, idTiendas)
+            cur.execute(sql, data)
+            datos = cur.fetchall()
+            print(datos)
+            db.commit()
+            return redirect(url_for('home'))
+        else:
+            return render_template('editUserTiendas.html', message="Todos los campos son obligatorios")
     except pymysql.Error as e:
         error_message = "Error de MySQL al ejecutar la consulta: {}".format(e)
 
@@ -513,11 +529,12 @@ def recoveryPassword():
     email = request.form['email']
     newPassword = request.form['newPassword']
     confirmPassword = request.form['confirmPassword']
+    cont_hash = generate_password_hash(newPassword, method='scrypt')
 
     if verificar_email_en_bd(email) and newPassword == confirmPassword:
         cur = cur = db.cursor()
         sql = "UPDATE login SET contraseña = %s WHERE email = %s"
-        data = (newPassword, email)
+        data = (cont_hash, email)
         cur.execute(sql, data)
         db.commit()
         cur.close()
@@ -525,7 +542,7 @@ def recoveryPassword():
     elif verificar_email_en_bd_tiendas(email) and newPassword == confirmPassword:
         cur = db.cursor()
         sql = "UPDATE usuarios_tiendas SET contraseña = %s WHERE email = %s"
-        data = (newPassword, email)
+        data = (cont_hash, email)
         cur.execute(sql, data)
         db.commit()
         cur.close()
