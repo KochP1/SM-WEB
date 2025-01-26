@@ -156,6 +156,10 @@ def userRegist():
 @app.route("/inbox", methods=['GET'])
 def inbox():
     cur = db.cursor()
+    cur.execute("SELECT tienda FROM usuarios_tiendas")
+    tiendas = cur.fetchall()
+    tiendas = [tienda[0] for tienda in tiendas]
+
     cur.execute("SELECT * FROM odt")
     fallas = cur.fetchall()
     insertObject = []
@@ -163,7 +167,57 @@ def inbox():
     for record in fallas:
           insertObject.append(dict(zip(columNamnes, record)))
     cur.close()
-    return render_template('inbox.html', fallas = insertObject)
+    return render_template('inbox.html', fallas = insertObject, tiendas = tiendas)
+
+
+# Agregar nueva falla
+@app.route("/new-falla-sambil", methods=['POST'])
+def newFallaSambil():
+    email = session['email']
+    tienda = request.form['tienda']
+    name = session['name']
+    surname = session['surname']
+    area = request.form['area']
+    tipo = request.form['tipo']
+    descripcion = request.form['descripcion']
+    fecha = request.form['fecha']
+
+    cur = db.cursor()
+    cur.execute("SELECT * FROM odt")
+    fallas = cur.fetchall()
+
+    cur.execute("SELECT tienda FROM usuarios_tiendas")
+    tiendas = cur.fetchall()
+    tiendas = [tienda[0] for tienda in tiendas]
+
+    insertObject = []
+    columNamnes = [column[0] for column in cur.description]
+    for record in fallas:
+        insertObject.append(dict(zip(columNamnes, record)))
+
+    if area == 'Selecciona un area':
+            return render_template('inbox.html', message='Debe seleccionar el area', fallas = insertObject, tiendas = tiendas)
+    elif tipo == 'Selecciona un tipo':
+            return render_template('inbox.html', message='Debe seleccionar el tipo', fallas = insertObject, tiendas = tiendas)
+    elif fecha == None:
+            return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject, tiendas = tiendas)
+
+    try:
+     if tienda and area and tipo and descripcion and fecha and tienda != 'Selecciona una tienda':
+         sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+         data = (email, name, surname, tienda, area, tipo, descripcion, fecha)
+         cur.execute(sql, data)
+         db.commit()
+         return redirect(url_for('inbox'))
+     else:
+         return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject, tiendas = tiendas)
+         
+         
+    except pymysql.Error as e:
+        if "Data too long for column 'descripcion'" in str(e):
+            return render_template('inbox.html', message='La descripcion tiene un maximo de 80 caracteres', fallas = insertObject, tiendas = tiendas)
+        else:
+            return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject, tiendas = tiendas)
 
 
 # Funcion para buscar una falla filtrando por fecha

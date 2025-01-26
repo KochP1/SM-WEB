@@ -33,6 +33,12 @@
                 </div>
                 {% endif %}
             </div>
+
+            <div class="card mt-3 w-25 mx-auto d-block">
+                <div class="card-body newFalla">
+                    <img src="{{url_for('static', filename='images/circle-plus-solid.svg')}}" alt="anadir tarea" width="25px" class="mx-auto d-block" data-bs-toggle="modal" data-bs-target="#falla-modal">
+                </div>
+            </div>
         </div>
 
         <!-- Reportes -->
@@ -84,6 +90,70 @@
          </div>
     </div>
 
+    <div class="modal fade" id="falla-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Nueva falla</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form action="/new-falla-sambil" method="post">
+                <label>Nombre</label>
+                <div class="form-control mb-3" name="name">{{session['name']}}</div>
+    
+                <label>Apellido</label>
+                <div class="form-control mb-3" name="surname">{{session['surname']}}</div>
+    
+                <label>Nombre de la tienda</label>
+                <select name="tienda" class="form-control mb-3 select">
+                    <option value= "Selecciona una tienda">Selecciona una tienda</option>
+                    {% for tienda in tiendas %}
+                       <option value="{{ tienda }}">{{ tienda }}</option>
+                    {% endfor %}
+                </select>
+    
+                <label>Selecciona el Area</label>
+                <select name="area" class="form-control mb-3 select">
+                    <option value= "Selecciona un area">Selecciona un area</option>
+                    <option value="Electrica">Electrica</option>
+                    <option value="Plomeria">Plomeria</option>
+                    <option value="Aire acondicionado">Aire acondicionado</option>
+                    <option value="Telecomunicaciones">Telecomunicaciones</option>
+                </select>
+    
+                <label class="label-tipo">Selecciona el tipo de falla</label>
+                <select name="tipo" class=" form-control mb-3 select">
+                    <option value= "Selecciona un tipo">Selecciona un tipo</option>
+                    <option value="Cambio de iluminacion" class="tipo-electrico option">Cambio de iluminacion</option>
+                    <option value="Tomacorriente" class="tipo-electrico2 option">Tomacorriente</option>
+                    <option value="Cambio de breakers" class="tipo-electrico3 option">Cambio de breakers</option>
+                    <option value="Ajuste de breakers" class="tipo-electrico4 option">Ajuste de breakers</option>
+                    <option value="Cambio de llave de arresto" class="tipo-plomeria option">Cambio de llave de arresto</option>
+                    <option value="Sifon" class="tipo-plomeria2 option">Sifon</option>
+                    <option value="Herraje" class="tipo-plomeria3 option">Herraje</option>
+                    <option value="Manguera W.C/Lavamano" class="tipo-plomeria4 option">Manguera W.C/Lavamano</option>
+                    <option value="Griferias" class="tipo-plomeria5 option">Griferias</option>
+                    <option value="Unidad de aire no enfria" class="tipo-AC option">Unidad de aire no enfria</option>
+                    <option value="Unidad de aire no enciende" class="tipo-AC2 option">Unidad de aire no enciende</option>
+                    <option value="Telefonia" class="tipo-telecoms option">Telefonia</option>
+                    <option value="Internet" class="tipo-telecoms2 option">Internet</option>
+                    <option value="Otro" class="option">Otro</option>
+                </select>
+    
+                <label>Descripcion</label>
+                <textarea class="form-control mb-3" rows="5" name="descripcion"></textarea>
+    
+                <label>Fecha</label>
+                <input type="date" class="form-control mb-3" name="fecha" placeholder="yyyy-mm-dd" min="2025-01-01" id="fecha">
+    
+                <button type="submit" class="btn btn-primary w-100 btn-fechas">Guardar</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <div class="modal fade" id="edit-falla__modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
@@ -100,7 +170,12 @@
                 <input type="text" class="form-control mb-3" name="surname"  id="surname">
     
                 <label>Nombre de la tienda</label>
-                <input type="text" class="form-control mb-3" name="tienda"  id="tienda">
+                <select name="tienda" class="form-control mb-3 select" id="tienda">
+                    <option value= "Selecciona una tienda">Selecciona una tienda</option>
+                    {% for tienda in tiendas %}
+                       <option value="{{ tienda }}">{{ tienda }}</option>
+                    {% endfor %}
+                </select>
     
                 <label>Selecciona el Area</label>
                 <select name="area" class="form-control mb-3 select" id="area">
@@ -189,6 +264,7 @@
         
             // Mostrar el select de tipo correspondiente a la opción seleccionada
             var selectedArea = areaSelect.value;
+            console.log(selectedArea)
             if (selectedArea === 'Electrica') {
                 tipoElectrico.style.display = 'block';
                 tipoElectrico2.style.display = 'block';
@@ -250,13 +326,7 @@
                 const fecha = card.querySelector('.label-fecha').innerText;
                 const id = card.querySelector('.input-id').value;
 
-                // Depurar los valores obtenidos
-                console.log("Área extraída:", area);
-                console.log("Tipo extraído:", tipo);
-                console.log("id", id)
-
                 // Llenar los campos del modal con los datos
-                document.getElementById('tienda').value = tienda;
                 document.getElementById('name').value = name;
                 document.getElementById('surname').value = surname;
                 document.getElementById('descripcion').innerText = descripcion;
@@ -275,6 +345,13 @@
                 const tipoSelect = document.getElementById('tipo');
                 for (let option of tipoSelect.options) {
                 if (tipo.toLowerCase().includes(option.text.toLowerCase())) {
+                option.selected = true;
+    }
+}
+// Seleccionar la opción correcta en el campo de tipo
+                const tiendas = document.getElementById('tienda');
+                for (let option of tiendas.options) {
+                if (tienda.toLowerCase().includes(option.text.toLowerCase())) {
                 option.selected = true;
     }
 }
