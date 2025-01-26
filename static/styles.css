@@ -204,7 +204,6 @@ input[type="search"]::-webkit-search-cancel-button {
     text-align: left; /* Añade esta propiedad para alinear el texto a la izquierda */
     padding-left: 0
 }
-
 .sidebar li a{
     width: 100%;
     color: #000;
@@ -217,6 +216,19 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 
+
+.user-container__mobile{
+    color: #fff;
+    background-color: red;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    font-size: 1.5rem;
+    text-align: center;
+    position: relative;
+    left: 5px;
+
+}
 
 .user-container{
     color: #fff;
@@ -517,6 +529,13 @@ body.dark-mode {
     .mobile__search-input{
         font-size: 0.8rem !important;
         margin-right: 10px;
+    }
+}
+
+@media(max-width: 500px){
+    table{
+        font-size: 0.3rem;
+        font-weight: normal;
     }
 }
 
