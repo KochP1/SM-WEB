@@ -226,7 +226,7 @@ input[type="search"]::-webkit-search-cancel-button {
     font-size: 1.5rem;
     text-align: center;
     position: relative;
-    left: 5px;
+    right: 4.5px;
 
 }
 
@@ -281,6 +281,11 @@ input[type="search"]::-webkit-search-cancel-button {
     height: 40px;
     margin-top: auto;
     margin-bottom: auto;
+}
+
+.switch__mobile a i{
+    position: relative;
+    right: 8px;
 }
 
 
@@ -674,16 +679,17 @@ body.dark-mode {
 
 }
 
-/* Acomodando las cards en en reso*/
+/* Acomodando las cards*/
 
 @media (max-width:1200px){
     .card-container{
         display: grid !important;
         grid-template-columns: repeat(auto-fit, 300px) !important;
-        margin: auto !important;
         margin-top: 30px !important;
         justify-content: center !important;
+        align-items: center !important;
         gap: 10px;
+        width: 100%;
     }
 
     .contenedor-reporte {
@@ -692,6 +698,6 @@ body.dark-mode {
 
     .card-falla{
         width: 300px !important;
-        margin-left: 30px;
     }
+    
 }
