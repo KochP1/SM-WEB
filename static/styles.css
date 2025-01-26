@@ -74,11 +74,14 @@ body{
 .alert{
     color: red;
     font-size: 0.9rem;
+    text-align: center;
+    font-weight: bold;
 }
 
 .succes{
     color: #2B4EFF;
     font-size: 0.9rem;
+    font-weight: bold;
 }
 
 
@@ -311,6 +314,10 @@ input[type="search"]::-webkit-search-cancel-button {
 .container__container{
     width: 100% !important;
     background-color: transparent !important;
+}
+
+.p__descripcion{
+    display: none;
 }
 
 /* Tiendas UI */

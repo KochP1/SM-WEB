@@ -26,6 +26,12 @@
                     <input type="date" class="form-control mb-3 date-input" placeholder="yyyy-mm-dd" min="2025-01-01" name='fecha-2'>
                     <button type="submit" class="btn btn-primary w-100 btn-fechas">Buscar</button>
                 </form>
+
+                {% if message %}
+                <div class="alert">
+                 {{message}}
+                </div>
+                {% endif %}
             </div>
         </div>
 
@@ -55,6 +61,9 @@
                         <div class="card-item">
                             <label>Descripcion:</label>
                             {{falla.descripcion}}
+                            <p class="p__descripcion">
+                                {{falla.descripcion}}
+                            </p>
                         </div>
                     </div>
 
@@ -94,8 +103,8 @@
                 <input type="text" class="form-control mb-3" name="tienda"  id="tienda">
     
                 <label>Selecciona el Area</label>
-                <select name="area" class="form-control mb-3" id="area">
-                    <option value=none>Selecciona un area</option>
+                <select name="area" class="form-control mb-3 select" id="area">
+                    <option value='Selecciona un area'>Selecciona un area</option>
                     <option value="Electrica">Electrica</option>
                     <option value="Plomeria">Plomeria</option>
                     <option value="Aire acondicionado">Aire acondicionado</option>
@@ -103,8 +112,8 @@
                 </select>
     
                 <label class="label-tipo">Selecciona el tipo de falla</label>
-                <select name="tipo" class=" form-control mb-3" id="tipo">
-                    <option value= none>Selecciona un tipo</option>
+                <select name="tipo" class=" form-control mb-3 select" id="tipo">
+                    <option value= 'Selecciona un tipo'>Selecciona un tipo</option>
                     <option value="Cambio de iluminacion" class="tipo-electrico option">Cambio de iluminacion</option>
                     <option value="Tomacorriente" class="tipo-electrico2 option">Tomacorriente</option>
                     <option value="Cambio de breakers" class="tipo-electrico3 option">Cambio de breakers</option>
@@ -237,7 +246,7 @@
                 const surname = card.querySelector('.card-item:nth-child(1)').innerText.trim().split(' ')[2];
                 const area = card.querySelector('.item-area').innerText; // Ajustar el selector para el área
                 const tipo = card.querySelector('.item-mb').innerText; // Ajustar el selector para el tipo
-                const descripcion = card.querySelector('.card-item:nth-child(4)').innerText.trim().split(' ')[1];
+                const descripcion = card.querySelector('.p__descripcion').textContent.trim(); 
                 const fecha = card.querySelector('.label-fecha').innerText;
                 const id = card.querySelector('.input-id').value;
 

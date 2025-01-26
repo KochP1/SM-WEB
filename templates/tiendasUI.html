@@ -18,8 +18,14 @@
 
     <div class="container">
         <div class="card mt-3 w-25 mx-auto d-block">
-            <div class="card-body d-flex newFalla">
+            <div class="card-body newFalla">
                 <img src="{{url_for('static', filename='images/circle-plus-solid.svg')}}" alt="anadir tarea" width="25px" class="mx-auto d-block" data-bs-toggle="modal" data-bs-target="#falla-modal">
+
+                {% if message %}
+                <div class="alert">
+                 {{message}}
+                </div>
+                {% endif %}
             </div>
         </div>
 
@@ -86,7 +92,7 @@
 
             <label>Selecciona el Area</label>
             <select name="area" class="form-control mb-3 select">
-                <option value= none>Selecciona un area</option>
+                <option value= "Selecciona un area">Selecciona un area</option>
                 <option value="Electrica">Electrica</option>
                 <option value="Plomeria">Plomeria</option>
                 <option value="Aire acondicionado">Aire acondicionado</option>
@@ -95,7 +101,7 @@
 
             <label class="label-tipo">Selecciona el tipo de falla</label>
             <select name="tipo" class=" form-control mb-3 select">
-                <option value= none>Selecciona un tipo</option>
+                <option value= "Selecciona un tipo">Selecciona un tipo</option>
                 <option value="Cambio de iluminacion" class="tipo-electrico option">Cambio de iluminacion</option>
                 <option value="Tomacorriente" class="tipo-electrico2 option">Tomacorriente</option>
                 <option value="Cambio de breakers" class="tipo-electrico3 option">Cambio de breakers</option>

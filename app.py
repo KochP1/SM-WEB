@@ -114,10 +114,13 @@ def userRegist():
     tienda = request.form['tienda']
     email = request.form['email']
     contraseña = request.form['contraseña']
+    if len(contraseña) > 12:
+        return render_template('regist.html', message = 'La contraseña tiene un maximo de 12 caracteres') 
     tipo = request.form['tipo-usuario']
     cont_hash = generate_password_hash(contraseña, method='scrypt')
 
     try:
+
       if tipo == 'tienda':
         sql = "INSERT INTO usuarios_tiendas (name, surname, tienda, email, contraseña) VALUES (%s, %s, %s, %s, %s)"
         data = (name, surname, tienda, email, cont_hash)
@@ -125,7 +128,7 @@ def userRegist():
         sql = "INSERT INTO login (name, surname, email, contraseña) VALUES (%s, %s, %s, %s)"
         data = (name, surname, email, cont_hash)
       else:
-        return redirect(url_for('regist', message='Debe escoger el tipo de usuario'))
+        return render_template('regist.html', message = 'Debe escoger el tipo de usuario')
 
       cur = db.cursor()
       cur.execute(sql, data)
@@ -134,10 +137,19 @@ def userRegist():
 
       return render_template('index.html')
 
-    except db.Error as e:
-      messageSql = 'Error SQL: {}'.format(str(e))
-      return messageSql
-    
+    except pymysql.Error as e:
+        error_message = "Error de MySQL al ejecutar la consulta: {}".format(e)
+
+        if "Data too long for column 'name'" in str(e):
+            return render_template('regist.html', message='El nombre tiene un máximo de 20 caracteres')
+        elif "Data too long for column 'surname'" in str(e):
+            return render_template('regist.html', message='El apellido tiene un máximo de 25 caracteres')
+        elif "Data too long for column 'tienda'" in str(e):
+            return render_template('regist.html', message='La tienda tiene un máximo de 25 caracteres')
+        elif "Data too long for column 'email'" in str(e):
+            return render_template('regist.html', message='El email tiene un máximo de 45 caracteres')
+        else:
+            return render_template('index.html', message=error_message)
 
 
 
@@ -214,14 +226,35 @@ def editFalla():
     fecha = request.form['fecha']
     idFalla = request.form['id']
 
-    if name and surname and tienda and area and tipo and descripcion and fecha:
-        cur = db.cursor()
-        sql = 'UPDATE odt SET name = %s, surname = %s, tienda = %s, area = %s, tipo = %s, descripcion = %s, fecha = %s WHERE id = %s'
-        data = (name, surname, tienda, area, tipo, descripcion, fecha, idFalla)
-        cur.execute(sql, data)
-        db.commit()
-        cur.close()
-    return redirect(url_for('inbox'))
+    cur = db.cursor()
+    cur.execute("SELECT * FROM odt")
+    fallas = cur.fetchall()
+    insertObject = []
+    columNamnes = [column[0] for column in cur.description]
+    for record in fallas:
+          insertObject.append(dict(zip(columNamnes, record)))
+
+    if area == 'Selecciona un area':
+            return render_template('inbox.html', message='Debe seleccionar el area', fallas = insertObject)
+    elif tipo == 'Selecciona un tipo':
+            return render_template('inbox.html', message='Debe seleccionar el tipo', fallas = insertObject)
+    elif fecha == None:
+            return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject)
+    
+    try:
+      if name and surname and tienda and area and tipo and descripcion and fecha:
+          cur = db.cursor()
+          sql = 'UPDATE odt SET name = %s, surname = %s, tienda = %s, area = %s, tipo = %s, descripcion = %s, fecha = %s WHERE id = %s'
+          data = (name, surname, tienda, area, tipo, descripcion, fecha, idFalla)
+          cur.execute(sql, data)
+          db.commit()
+          cur.close()
+          return redirect(url_for('inbox'))
+    except pymysql.Error as e:
+        if "Data too long for column 'descripcion'" in str(e):
+            return render_template('inbox.html', message='La descripcion tiene un maximo de 80 caracteres', fallas = insertObject)
+        else:
+            return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject)
 
 
 
@@ -241,8 +274,12 @@ def editUsers():
     email = request.form['email']
     contAct = request.form['contraseña_Act']
     cont = request.form['contraseña']
+    if len(cont) > 12:
+        return render_template('editUser.html', message = 'La contraseña tiene un maximo de 12 caracteres')
 
-    if name and surname and email and cont and contAct == session['contraseña']:
+    try:
+
+     if name and surname and email and cont and contAct == session['contraseña']:
         cur = cur = db.cursor()
         sql = "UPDATE login SET name = %s, surname = %s, email = %s, contraseña = %s WHERE id = %s"
         data = (name, surname, email, cont, ID)
@@ -250,7 +287,7 @@ def editUsers():
         db.commit()
         cur.close()
         return redirect(url_for('home'))
-    elif name and surname and email:
+     elif name and surname and email:
         cur = db.cursor()
         sql = "UPDATE login SET name = %s, surname = %s, email = %s WHERE id = %s"
         data = (name, surname, email, ID)
@@ -258,8 +295,19 @@ def editUsers():
         db.commit()
         cur.close()
         return redirect(url_for('home'))
-    else:
+     else:
         return redirect(url_for('editUser', message = "Las contrasenas no coinciden"))
+    except pymysql.Error as e:
+        error_message = "Error de MySQL al ejecutar la consulta: {}".format(e)
+
+        if "Data too long for column 'name'" in str(e):
+            return render_template('editUser.html', message='El nombre tiene un máximo de 20 caracteres')
+        elif "Data too long for column 'surname'" in str(e):
+            return render_template('editUser.html', message='El apellido tiene un máximo de 25 caracteres')
+        elif "Data too long for column 'email'" in str(e):
+            return render_template('editUser.html', message='El email tiene un máximo de 45 caracteres')
+        else:
+            return render_template('index.html', message=error_message)
 
 # Template para la vista de reportes de fallas
 
@@ -290,8 +338,6 @@ def reporteTiendas():
 
     return render_template("reporteTiendas.html", tiendas = insertObject)
 
-
-
 # Template para las tiendas
 @app.route("/tiendasUI", methods=['GET'])
 def tiendasUI():
@@ -321,13 +367,36 @@ def newFalla():
     descripcion = request.form['descripcion']
     fecha = request.form['fecha']
 
-    if tienda and area and tipo and descripcion and fecha:
-        cur = db.cursor()
-        sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-        data = (email, name, surname, tienda, area, tipo, descripcion, fecha)
-        cur.execute(sql, data)
-        db.commit()
-    return redirect(url_for('tiendasUI'))
+    cur = db.cursor()
+    cur.execute("SELECT * FROM odt WHERE email = %s", [email])
+    fallas = cur.fetchall()
+
+    insertObject = []
+    columNamnes = [column[0] for column in cur.description]
+    for record in fallas:
+        insertObject.append(dict(zip(columNamnes, record)))
+
+    if area == 'Selecciona un area':
+            return render_template('tiendasUI.html', message='Debe seleccionar el area', fallas = insertObject)
+    elif tipo == 'Selecciona un tipo':
+            return render_template('tiendasUI.html', message='Debe seleccionar el tipo', fallas = insertObject)
+    elif fecha == None:
+            return render_template('tiendasUI.html', message='Todos los campos son obligatorios', fallas = insertObject)
+
+    try:
+     if tienda and area and tipo and descripcion and fecha:
+         sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+         data = (email, name, surname, tienda, area, tipo, descripcion, fecha)
+         cur.execute(sql, data)
+         db.commit()
+         return redirect(url_for('tiendasUI'))
+         
+    except pymysql.Error as e:
+        if "Data too long for column 'descripcion'" in str(e):
+            return render_template('tiendasUI.html', message='La descripcion tiene un maximo de 80 caracteres', fallas = insertObject)
+        else:
+            return render_template('tiendasUI.html', message='Todos los campos son obligatorios', fallas = insertObject)
+
 
 
 
@@ -347,21 +416,36 @@ def editUsersTiendasFunc():
     email = request.form['email']
     cont_act = request.form['contraseña_Act']           
     cont = request.form['contraseña']
+    if len(cont) > 12:
+        return render_template('editUserTiendas.html', message = 'La contraseña tiene un maximo de 12 caracteres')
 
-    
-    if name and surname and tienda and email:
-      if cont_act == session['contraseña']:
-         cur = db.cursor()
-         sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s, contraseña = %s WHERE idTiendas = %s"
-         data = (name, surname, tienda, email, cont, idTiendas)
-         cur.execute(sql, data)
-         db.commit()
-         cur.close()
-         return redirect(url_for('home'))
-      else:
-         return redirect(url_for('editUserTiendas'), message='Contraseña incorrecta')
-    else:
+    try:
+     if name and surname and tienda and email:
+       if cont_act == session['contraseña']:
+          cur = db.cursor()
+          sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s, contraseña = %s WHERE idTiendas = %s"
+          data = (name, surname, tienda, email, cont, idTiendas)
+          cur.execute(sql, data)
+          db.commit()
+          cur.close()
+          return redirect(url_for('home'))
+       else:
+          return redirect(url_for('editUserTiendas'), message='Contraseña incorrecta')
+     else:
         return redirect(url_for('editUserTiendas'), message='Los campos Nombre, apellido y Email no deben estar vacíos')
+    except pymysql.Error as e:
+        error_message = "Error de MySQL al ejecutar la consulta: {}".format(e)
+
+        if "Data too long for column 'name'" in str(e):
+            return render_template('editUserTiendas.html', message='El nombre tiene un máximo de 20 caracteres')
+        elif "Data too long for column 'surname'" in str(e):
+            return render_template('editUserTiendas.html', message='El apellido tiene un máximo de 25 caracteres')
+        elif "Data too long for column 'tienda'" in str(e):
+            return render_template('editUserTiendas.html', message='La tienda tiene un máximo de 25 caracteres')
+        elif "Data too long for column 'email'" in str(e):
+            return render_template('editUserTiendas.html', message='El email tiene un máximo de 45 caracteres')
+        else:
+            return render_template('index.html', message=error_message)
 
 # Eliminar falla
 @app.route("/delete-falla", methods=['POST'])
@@ -371,7 +455,7 @@ def deleteFalla():
     sql = "DELETE FROM odt WHERE id = %s"
     data = (id,)
     cur.execute(sql, data)
-    db.commit
+    db.commit()
     return redirect(url_for('inbox'))
 
 # Template para olvidaste tu contrasena
