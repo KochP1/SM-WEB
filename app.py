@@ -406,7 +406,7 @@ def editUserTiendas():
 # Funcion para editar usuarios de las tiendas
 @app.route("/edit-user-tiendas", methods=['POST'])
 def editUsersTiendasFunc():
-    idTiendas = request.form['id']
+    idTiendas = session['id']
     name = request.form['name']
     surname = request.form['surname']
     tienda = request.form['tienda']
@@ -414,32 +414,26 @@ def editUsersTiendasFunc():
     contAct = request.form['contraseña_Act']
     cont = request.form['contraseña']
     cont_hash = generate_password_hash(cont, method='scrypt')
-    
+
     if len(cont) > 12:
         return render_template('editUserTiendas.html', message='La contraseña tiene un máximo de 12 caracteres')
 
     try:
-        print("Datos recibidos:", idTiendas, name, surname, tienda, email, contAct, cont, cont_hash)
-        if name and surname and email and tienda and cont and contAct:
-            if check_password_hash(session['contraseña'], contAct):
-                cur = db.cursor()
-                sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s, contraseña = %s WHERE idTiendas = %s"
-                data = (name, surname, tienda, email, cont_hash, idTiendas)
-                cur.execute(sql, data)
-                datos = cur.fetchall()
-                print(datos)
-                db.commit()
-                return redirect(url_for('home'))
-            else:
-                return render_template('editUserTiendas.html', message="La contraseña es incorrecta")
-        elif name and surname and email and tienda:
+        if name and surname and email and tienda:
             cur = db.cursor()
-            sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s WHERE idTiendas = %s"
-            data = (name, surname, tienda, email, idTiendas)
+            if cont and contAct:
+                if check_password_hash(session['contraseña'], contAct):
+                    sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s, contraseña = %s WHERE idTiendas = %s"
+                    data = (name, surname, tienda, email, cont_hash, idTiendas)
+                else:
+                    return render_template('editUserTiendas.html', message="La contraseña es incorrecta")
+            else:
+                sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s WHERE idTiendas = %s"
+                data = (name, surname, tienda, email, idTiendas)
+
             cur.execute(sql, data)
-            datos = cur.fetchall()
-            print(datos)
             db.commit()
+            cur.close()
             return redirect(url_for('home'))
         else:
             return render_template('editUserTiendas.html', message="Todos los campos son obligatorios")
@@ -456,7 +450,7 @@ def editUsersTiendasFunc():
             return render_template('editUserTiendas.html', message='El email tiene un máximo de 45 caracteres')
         else:
             return render_template('index.html', message=error_message)
-
+        
 # Eliminar falla
 @app.route("/delete-falla", methods=['POST'])
 def deleteFalla():
