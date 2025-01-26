@@ -4,7 +4,7 @@ from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 import pymysql
 import pymysql.cursors
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 # INICIALIZACION DE LA APLICACION FLASK
@@ -60,42 +60,36 @@ app.app_context().push()
 def home():
     return render_template("index.html")
 
-# FUNCION PARA LOS DOS TIPOS DE USUARIOS 
 @app.route("/login", methods=["POST"])
 def login():
-
     # INICIO DE SESION
     email = request.form['email']
     contraseña = request.form['contraseña']
 
     if email and contraseña:
         cur = db.cursor()
-        #cur.execute("SELECT * FROM login WHERE email = %s AND contraseña = %s", (email, contraseña))
         cur.execute("SELECT * FROM login WHERE email = %s", (email,))
         user = cur.fetchone()
 
-        if user is not None:
+        if user is not None and check_password_hash(user[4], contraseña):
             session['id'] = user[0]
             session['email'] = email
             session['name'] = user[1]
             session['surname'] = user[2]
-            session['contraseña'] =  contraseña
             return redirect(url_for('inbox'))
-
+        
         cur.execute("SELECT * FROM usuarios_tiendas WHERE email = %s", (email,))
         user = cur.fetchone()
-        if user is not None:
+
+        if user is not None and check_password_hash(user[5], contraseña):
             session['id'] = user[0]
             session['email'] = email
             session['name'] = user[1]
             session['surname'] = user[2]
-            session['contraseña'] =  contraseña
             session['tienda'] = user[3]
-            print(session['tienda'])
             return redirect(url_for('tiendasUI'))
-        else:
-            return render_template('index.html', message="Las credenciales no son correctas")
-    
+        
+    return render_template('index.html', message="Las credenciales no son correctas")
 
 
 
