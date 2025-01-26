@@ -110,6 +110,7 @@ def userRegist():
     tienda = request.form['tienda']
     email = request.form['email']
     contraseña = request.form['contraseña']
+    clave = request.form['clave']
     if len(contraseña) > 12:
         return render_template('regist.html', message = 'La contraseña tiene un maximo de 12 caracteres') 
     tipo = request.form['tipo-usuario']
@@ -121,8 +122,8 @@ def userRegist():
         sql = "INSERT INTO usuarios_tiendas (name, surname, tienda, email, contraseña) VALUES (%s, %s, %s, %s, %s)"
         data = (name, surname, tienda, email, cont_hash)
       elif tipo == 'sambil':
-        sql = "INSERT INTO login (name, surname, email, contraseña) VALUES (%s, %s, %s, %s)"
-        data = (name, surname, email, cont_hash)
+        sql = "INSERT INTO login (name, surname, email, contraseña, claveAcc) VALUES (%s, %s, %s, %s, %s)"
+        data = (name, surname, email, cont_hash, clave)
       else:
         return render_template('regist.html', message = 'Debe escoger el tipo de usuario')
 
@@ -144,6 +145,8 @@ def userRegist():
             return render_template('regist.html', message='La tienda tiene un máximo de 25 caracteres')
         elif "Data too long for column 'email'" in str(e):
             return render_template('regist.html', message='El email tiene un máximo de 45 caracteres')
+        elif 'Cannot add or update a child row: a foreign key constraint fails (`sm`.`login`, CONSTRAINT `Acces` FOREIGN KEY (`claveAcc`) REFERENCES `Acceso` (`claveAcc`))':
+            return render_template('regist.html', message='La clave de acceso no es correcta')
         else:
             return render_template('index.html', message=error_message)
 
