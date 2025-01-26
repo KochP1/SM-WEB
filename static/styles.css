@@ -692,5 +692,6 @@ body.dark-mode {
 
     .card-falla{
         width: 300px !important;
+        margin-left: 30px;
     }
 }
