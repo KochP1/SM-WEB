@@ -209,7 +209,7 @@
                 <textarea class="form-control mb-3" rows="5" name="descripcion" id="descripcion"></textarea>
     
                 <label>Fecha</label>
-                <input type="date" class="form-control mb-3" name="fecha" placeholder="yyyy-mm-dd" min="2025-01-01" id="fecha">
+                <input type="date" class="form-control mb-3" name="fecha" placeholder="yyyy-mm-dd" min="2025-01-01" id="fecha_edit">
     
                 <input type="hidden" class="input-id__modal" id="edit-id" name="id">
                 <button type="submit" class="btn btn-primary w-100 btn-fechas">Guardar</button>
@@ -358,7 +358,7 @@
 
         <script>
             // Obtener el input de fecha
-      var inputFecha = document.getElementById('fecha');
+      const inputFecha = document.getElementById('fecha');
     
     // Mostrar un selector de fecha personalizado
       inputFecha.addEventListener('focus', function() {
@@ -374,7 +374,30 @@
         var formattedDate = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
         console.log(formattedDate); // Esta es la fecha en el formato yyyy-mm-dd
       });
+
     </script>
+
+  <script>
+    // Obtener el input de fecha
+   const inputFecha2 = document.getElementById('fecha_edit');
+
+
+
+// Mostrar un selector de fecha personalizado
+  inputFecha2.addEventListener('focus', function() {
+  var datepicker = new Datepicker(inputFecha2, {
+    format: 'yyyy-mm-dd',
+    autohide: true
+ });
+ });
+
+// Convertir y mostrar la fecha en el formato deseado antes de enviarla al servidor
+  inputFecha2.addEventListener('change', function() {
+  var dateParts = inputFecha2.value.split('-');
+  var formattedDate = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
+  console.log(formattedDate); // Esta es la fecha en el formato yyyy-mm-dd
+ });
+  </script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -395,12 +418,14 @@
                 const fecha = card.querySelector('.label-fecha').innerText;
                 const id = card.querySelector('.input-id').value;
 
+                console.log(fecha)
+
                 // Llenar los campos del modal con los datos
                 document.getElementById('name').value = name;
                 document.getElementById('surname').value = surname;
                 document.getElementById('descripcion').innerText = descripcion;
-                document.getElementById('fecha').value = fecha
-                document.getElementById('edit-id').value = id
+                document.getElementById('fecha_edit').value = fecha;
+                document.getElementById('edit-id').value = id;
 
                 // Seleccionar la opción correcta en el campo de área
                 const areaSelect = document.getElementById('area');

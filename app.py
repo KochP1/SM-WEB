@@ -185,15 +185,14 @@ def newFallaSambil():
     cur = db.cursor()
     cur.execute("SELECT * FROM odt")
     fallas = cur.fetchall()
+    insertObject = []
+    columNamnes = [column[0] for column in cur.description]
+    for record in fallas:
+          insertObject.append(dict(zip(columNamnes, record)))
 
     cur.execute("SELECT tienda FROM usuarios_tiendas")
     tiendas = cur.fetchall()
     tiendas = [tienda[0] for tienda in tiendas]
-
-    insertObject = []
-    columNamnes = [column[0] for column in cur.description]
-    for record in fallas:
-        insertObject.append(dict(zip(columNamnes, record)))
 
     if area == 'Selecciona un area':
             return render_template('inbox.html', message='Debe seleccionar el area', fallas = insertObject, tiendas = tiendas)
