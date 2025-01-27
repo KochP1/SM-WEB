@@ -507,7 +507,7 @@ def editUsersTiendasFunc():
         else:
             return render_template('index.html', message=error_message)
         
-# Eliminar falla
+# Eliminar falla usuarios administradores
 @app.route("/delete-falla", methods=['POST'])
 def deleteFalla():
     cur = db.cursor()
@@ -517,6 +517,7 @@ def deleteFalla():
     cur.execute(sql, data)
     db.commit()
     return redirect(url_for('inbox'))
+
 
 # Template para olvidaste tu contrasena
 

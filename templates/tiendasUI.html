@@ -62,7 +62,6 @@
                         {{falla.fecha}}
                         <form action="/delete-falla" method="post">
                             <input type="hidden" value="{{falla.id}}" name="id">
-                            <button type="submit" class="btn btn-outline-danger btn-sm">Eliminar</button>
                         </form>
                     </div>
                 </div>
@@ -100,7 +99,7 @@
             </select>
 
             <label class="label-tipo">Selecciona el tipo de falla</label>
-            <select name="tipo" class=" form-control mb-3 select">
+            <select name="tipo" class=" form-control mb-3 select" id="tipo__falla-modal-tiendas">
                 <option value= "Selecciona un tipo">Selecciona un tipo</option>
                 <option value="Cambio de iluminacion" class="tipo-electrico option">Cambio de iluminacion</option>
                 <option value="Tomacorriente" class="tipo-electrico2 option">Tomacorriente</option>
@@ -152,10 +151,13 @@ var areaSelect = document.querySelector('select[name="area"]');
     
     var tipoTelecoms = document.querySelector('.tipo-telecoms');
     var tipoTelecoms2 = document.querySelector('.tipo-telecoms2');
+    var tipoSelect = document.getElementById('tipo__falla-modal-tiendas');
     
     // Mostrar u ocultar el select de tipo según la opción seleccionada en 'Area'
     areaSelect.addEventListener('change', function() {
         // Ocultar todos los selects de tipo
+        tipoSelect.selectedIndex = 0;
+
         tipoElectrico.style.display = 'none';
         tipoElectrico2.style.display = 'none';
         tipoElectrico3.style.display = 'none';
