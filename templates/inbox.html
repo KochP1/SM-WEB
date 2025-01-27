@@ -123,7 +123,7 @@
             </select>
 
             <label class="label-tipo">Selecciona el tipo de falla</label>
-            <select name="tipo" class=" form-control mb-3 select">
+            <select name="tipo" class=" form-control mb-3 select" id="tipo__falla-modal">
                 <option value= "Selecciona un tipo">Selecciona un tipo</option>
                 <option value="Cambio de iluminacion" class="tipo-electrico option">Cambio de iluminacion</option>
                 <option value="Tomacorriente" class="tipo-electrico2 option">Tomacorriente</option>
@@ -154,7 +154,7 @@
         </div>
       </div>
 
-    <div class="modal fade" id="edit-falla__modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal fade" id="edit-falla__modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
@@ -210,7 +210,7 @@
     
                 <label>Fecha</label>
                 <input type="date" class="form-control mb-3" name="fecha" placeholder="yyyy-mm-dd" min="2025-01-01" id="fecha">
-
+    
                 <input type="hidden" class="input-id__modal" id="edit-id" name="id">
                 <button type="submit" class="btn btn-primary w-100 btn-fechas">Guardar</button>
               </form>
@@ -241,10 +241,14 @@
         
         var tipoTelecoms = document.querySelector('.tipo-telecoms');
         var tipoTelecoms2 = document.querySelector('.tipo-telecoms2');
+
+        var tipoSelect = document.getElementById('tipo__falla-modal');
         
         // Mostrar u ocultar el select de tipo según la opción seleccionada en 'Area'
         areaSelect.addEventListener('change', function() {
             // Ocultar todos los selects de tipo
+            tipoSelect.selectedIndex = 0;
+
             tipoElectrico.style.display = 'none';
             tipoElectrico2.style.display = 'none';
             tipoElectrico3.style.display = 'none';
@@ -287,70 +291,69 @@
     
 
     <script>
-        // Obtener el select de 'Area'
-    var areaSelect = document.querySelector('select[name="area"]');
+        // Obtener el select de 'Area' y sus opciones de tipo para el modal de editar falla
+        var areaSelectEdit = document.querySelector('#edit-falla__modal select[name="area"]');
         
-        // Obtener los select de tipo para cada área
-        var tipoElectrico = document.querySelector('.tipo-electrico');
-        var tipoElectrico2 = document.querySelector('.tipo-electrico2');
-        var tipoElectrico3 = document.querySelector('.tipo-electrico3');
-        var tipoElectrico4 = document.querySelector('.tipo-electrico4');
-    
-        var tipoPlomeria = document.querySelector('.tipo-plomeria');
-        var tipoPlomeria2 = document.querySelector('.tipo-plomeria2');
-        var tipoPlomeria3 = document.querySelector('.tipo-plomeria3');
-        var tipoPlomeria4 = document.querySelector('.tipo-plomeria4');
-        var tipoPlomeria5 = document.querySelector('.tipo-plomeria5');
-    
-        var tipoAC = document.querySelector('.tipo-AC');
-        var tipoAC2 = document.querySelector('.tipo-AC2');
+        // Obtener los select de tipo para cada área en el modal de editar falla
+        var tipoElectricoEdit = document.querySelector('#edit-falla__modal .tipo-electrico');
+        var tipoElectrico2Edit = document.querySelector('#edit-falla__modal .tipo-electrico2');
+        var tipoElectrico3Edit = document.querySelector('#edit-falla__modal .tipo-electrico3');
+        var tipoElectrico4Edit = document.querySelector('#edit-falla__modal .tipo-electrico4');
+        var tipoPlomeriaEdit = document.querySelector('#edit-falla__modal .tipo-plomeria');
+        var tipoPlomeria2Edit = document.querySelector('#edit-falla__modal .tipo-plomeria2');
+        var tipoPlomeria3Edit = document.querySelector('#edit-falla__modal .tipo-plomeria3');
+        var tipoPlomeria4Edit = document.querySelector('#edit-falla__modal .tipo-plomeria4');
+        var tipoPlomeria5Edit = document.querySelector('#edit-falla__modal .tipo-plomeria5');
+        var tipoACEdit = document.querySelector('#edit-falla__modal .tipo-AC');
+        var tipoAC2Edit = document.querySelector('#edit-falla__modal .tipo-AC2');
+        var tipoTelecomsEdit = document.querySelector('#edit-falla__modal .tipo-telecoms');
+        var tipoTelecoms2Edit = document.querySelector('#edit-falla__modal .tipo-telecoms2');
+        var tipoSelectEdit = document.getElementById('tipo');
         
-        var tipoTelecoms = document.querySelector('.tipo-telecoms');
-        var tipoTelecoms2 = document.querySelector('.tipo-telecoms2');
-        
-        // Mostrar u ocultar el select de tipo según la opción seleccionada en 'Area'
-        areaSelect.addEventListener('change', function() {
+        // Mostrar u ocultar el select de tipo según la opción seleccionada en 'Area' en el modal de editar falla
+        areaSelectEdit.addEventListener('change', function() {
             // Ocultar todos los selects de tipo
-            tipoElectrico.style.display = 'none';
-            tipoElectrico2.style.display = 'none';
-            tipoElectrico3.style.display = 'none';
-            tipoElectrico4.style.display = 'none';
+            tipoSelectEdit.selectedIndex = 0;
+
+            tipoElectricoEdit.style.display = 'none';
+            tipoElectrico2Edit.style.display = 'none';
+            tipoElectrico3Edit.style.display = 'none';
+            tipoElectrico4Edit.style.display = 'none';
     
-            tipoPlomeria.style.display = 'none';
-            tipoPlomeria2.style.display = 'none';
-            tipoPlomeria3.style.display = 'none';
-            tipoPlomeria4.style.display = 'none';
-            tipoPlomeria5.style.display = 'none';
+            tipoPlomeriaEdit.style.display = 'none';
+            tipoPlomeria2Edit.style.display = 'none';
+            tipoPlomeria3Edit.style.display = 'none';
+            tipoPlomeria4Edit.style.display = 'none';
+            tipoPlomeria5Edit.style.display = 'none';
     
-            tipoAC.style.display = 'none';
-            tipoAC2.style.display = 'none';
+            tipoACEdit.style.display = 'none';
+            tipoAC2Edit.style.display = 'none';
     
-            tipoTelecoms.style.display = 'none';
-            tipoTelecoms2.style.display = 'none';
+            tipoTelecomsEdit.style.display = 'none';
+            tipoTelecoms2Edit.style.display = 'none';
         
             // Mostrar el select de tipo correspondiente a la opción seleccionada
-            var selectedArea = areaSelect.value;
+            var selectedArea = areaSelectEdit.value;
             if (selectedArea === 'Electrica') {
-                tipoElectrico.style.display = 'block';
-                tipoElectrico2.style.display = 'block';
-                tipoElectrico3.style.display = 'block';
-                tipoElectrico4.style.display = 'block';
+                tipoElectricoEdit.style.display = 'block';
+                tipoElectrico2Edit.style.display = 'block';
+                tipoElectrico3Edit.style.display = 'block';
+                tipoElectrico4Edit.style.display = 'block';
             } else if (selectedArea === 'Plomeria') {
-                tipoPlomeria.style.display = 'block';
-                tipoPlomeria2.style.display = 'block';
-                tipoPlomeria3.style.display = 'block';
-                tipoPlomeria4.style.display = 'block';
-                tipoPlomeria5.style.display = 'block';
+                tipoPlomeriaEdit.style.display = 'block';
+                tipoPlomeria2Edit.style.display = 'block';
+                tipoPlomeria3Edit.style.display = 'block';
+                tipoPlomeria4Edit.style.display = 'block';
+                tipoPlomeria5Edit.style.display = 'block';
             } else if (selectedArea === 'Aire acondicionado') {
-                tipoAC.style.display = 'block';
-                tipoAC2.style.display = 'block';
+                tipoACEdit.style.display = 'block';
+                tipoAC2Edit.style.display = 'block';
             } else if (selectedArea === 'Telecomunicaciones') {
-                tipoTelecoms.style.display = 'block';
-                tipoTelecoms2.style.display = 'block';
+                tipoTelecomsEdit.style.display = 'block';
+                tipoTelecoms2Edit.style.display = 'block';
             }
         });
     </script>
-
 
 
         <script>
