@@ -18,7 +18,7 @@ db = pymysql.connect(
     port=30481,
     user='root',
     password='YRyowWnclqRtxerAfrQBndKOVcyauzzG',
-    database='sm'
+    database='sm2.0'
 )
 app.config["SECRET_KEY"] = "1145"  # Define la clave secreta antes de acceder a la sesión
 
