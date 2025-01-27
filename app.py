@@ -443,6 +443,8 @@ def newFalla():
          cur.execute(sql, data)
          db.commit()
          return redirect(url_for('tiendasUI'))
+     else:
+         return render_template('tiendasUI.html', message='Todos los campos son obligatorios', fallas = insertObject)
          
     except pymysql.Error as e:
         if "Data too long for column 'descripcion'" in str(e):

@@ -17,15 +17,14 @@
 
 
     <div class="container">
-        <div class="card mt-3 w-25 mx-auto d-block">
-            <div class="card-body newFalla">
-                <img src="{{url_for('static', filename='images/circle-plus-solid.svg')}}" alt="anadir tarea" width="25px" class="mx-auto d-block" data-bs-toggle="modal" data-bs-target="#falla-modal">
-
-                {% if message %}
+        {% if message %}
                 <div class="alert">
                  {{message}}
                 </div>
-                {% endif %}
+        {% endif %}
+        <div class="card mt-3 w-25 mx-auto d-block">
+            <div class="card-body newFalla">
+                <img src="{{url_for('static', filename='images/circle-plus-solid.svg')}}" alt="anadir tarea" width="25px" class="mx-auto d-block" data-bs-toggle="modal" data-bs-target="#falla-modal">
             </div>
         </div>
 
