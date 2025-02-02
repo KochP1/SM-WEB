@@ -10,9 +10,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # INICIALIZACION DE LA APLICACION FLASK
 app = Flask(__name__, template_folder="templates")
 
-#app.config["MYSQL_CURSORCLASS"]="dictCursor"
-#mysql = MySQL(app)
-
 db = pymysql.connect(
     host='junction.proxy.rlwy.net',
     port=30481,
@@ -42,7 +39,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'juanandreskochp@gmail.com'
-app.config['MAIL_PASSWORD'] = 'nlyl open nvhv dtlg'
+app.config['MAIL_PASSWORD'] = 'uqpz jftw ckul snxm'
 app.config['MAIL_DEFAULT_SENDER'] = 'juanandreskochp@gmail.com'
 mail = Mail(app)
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
