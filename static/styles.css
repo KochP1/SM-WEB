@@ -384,6 +384,27 @@ table
     margin-top: 50px;
 }
 
+.btn-excel__conatiner{
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.btn-excel{
+    font-size: 1.5rem;
+    color: #fff;
+    background-color: #50834f;
+    border: none;
+    border-radius: 5px;
+    transition-property: outline, border;
+    transition-duration: 0.5s;
+}
+
+.btn-excel:hover{
+    outline: 5px solid #50834f;
+    border: 1px solid #fff;
+}
+
 /* Modo oscuro */
 
 body.dark-mode {

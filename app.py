@@ -129,6 +129,10 @@ def editUsers():
 def reporteFallas():
     return reportes_manager.mostrarReportes()
 
+@app.route("/descargar_excel", methods = ['GET'])
+def descargar_excel():
+    return reportes_manager.generar_excel()
+
 # Template para la vista de reportes de tiendas registradas
 
 @app.route("/reporte-tiendas", methods = ['GET'])
