@@ -1,10 +1,12 @@
 from flask import Flask
-from flask import render_template, redirect, request, session, url_for
-from flask_mail import Mail, Message
-from itsdangerous import URLSafeTimedSerializer
+from flask import render_template
 import pymysql
 import pymysql.cursors
-from werkzeug.security import generate_password_hash, check_password_hash
+from clases.user import Usuario
+from clases.fallas import Falla
+from clases.templates import Templates
+from clases.mail_server import mail
+from clases.reportes import Reportes
 
 
 # INICIALIZACION DE LA APLICACION FLASK
@@ -18,6 +20,13 @@ db = pymysql.connect(
     database='sm2.0'
 )
 app.config["SECRET_KEY"] = "1145"  # Define la clave secreta antes de acceder a la sesión
+
+# Instancia de la clase Usuario
+usuario_manager = Usuario(db)
+fallas_manager = Falla(db)
+templates_manager = Templates(db)
+mail_manager = mail(db, app)
+reportes_manager = Reportes(db)
 
 # Función para verificar si la conexión a la base de datos es exitosa
 
@@ -34,15 +43,7 @@ except pymysql.Error as e:
         print(f"Error al conectar a la base de datos: {e}")
 
 
-# Configuración de Flask-Mail y Serializer
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'juanandreskochp@gmail.com'
-app.config['MAIL_PASSWORD'] = 'uqpz jftw ckul snxm'
-app.config['MAIL_DEFAULT_SENDER'] = 'juanandreskochp@gmail.com'
-mail = Mail(app)
-serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+
 
 app.app_context().push()
 
@@ -59,36 +60,7 @@ def home():
 
 @app.route("/login", methods=["POST"])
 def login():
-    # INICIO DE SESION
-    email = request.form['email']
-    contraseña = request.form['contraseña']
-
-    if email and contraseña:
-        cur = db.cursor()
-        cur.execute("SELECT * FROM login WHERE email = %s", (email,))
-        user = cur.fetchone()
-
-        if user is not None and check_password_hash(user[4], contraseña):
-            session['id'] = user[0]
-            session['email'] = email
-            session['name'] = user[1]
-            session['surname'] = user[2]
-            session['contraseña'] = user[4]
-            return redirect(url_for('inbox'))
-        
-        cur.execute("SELECT * FROM usuarios_tiendas WHERE email = %s", (email,))
-        user = cur.fetchone()
-
-        if user is not None and check_password_hash(user[5], contraseña):
-            session['id'] = user[0]
-            session['email'] = email
-            session['name'] = user[1]
-            session['surname'] = user[2]
-            session['tienda'] = user[3]
-            session['contraseña'] = user[5]
-            return redirect(url_for('tiendasUI'))
-        
-    return render_template('index.html', message="Las credenciales no son correctas")
+    return usuario_manager.login()
 
 
 
@@ -102,163 +74,32 @@ def regist():
 # Creacion de usuarios
 @app.route("/user_regist", methods=['POST'])
 def userRegist():
-    name = request.form['name']
-    surname = request.form['surname']
-    tienda = request.form['tienda']
-    email = request.form['email']
-    contraseña = request.form['contraseña']
-    clave = request.form['clave']
-    if len(contraseña) > 12:
-        return render_template('regist.html', message = 'La contraseña tiene un maximo de 12 caracteres') 
-    tipo = request.form['tipo-usuario']
-    cont_hash = generate_password_hash(contraseña, method='scrypt')
-
-    try:
-
-      if tipo == 'tienda':
-        sql = "INSERT INTO usuarios_tiendas (name, surname, tienda, email, contraseña) VALUES (%s, %s, %s, %s, %s)"
-        data = (name, surname, tienda, email, cont_hash)
-      elif tipo == 'sambil':
-        sql = "INSERT INTO login (name, surname, email, contraseña, claveAcc) VALUES (%s, %s, %s, %s, %s)"
-        data = (name, surname, email, cont_hash, clave)
-      else:
-        return render_template('regist.html', message = 'Debe escoger el tipo de usuario')
-
-      cur = db.cursor()
-      cur.execute(sql, data)
-      db.commit()
-      cur.close()  # Cerrar el cursor después de ejecutar la consulta
-
-      return render_template('index.html')
-
-    except pymysql.Error as e:
-        error_message = "Error de MySQL al ejecutar la consulta: {}".format(e)
-
-        if "Data too long for column 'name'" in str(e):
-            return render_template('regist.html', message='El nombre tiene un máximo de 20 caracteres')
-        elif "Data too long for column 'surname'" in str(e):
-            return render_template('regist.html', message='El apellido tiene un máximo de 25 caracteres')
-        elif "Data too long for column 'tienda'" in str(e):
-            return render_template('regist.html', message='La tienda tiene un máximo de 25 caracteres')
-        elif "Data too long for column 'email'" in str(e):
-            return render_template('regist.html', message='El email tiene un máximo de 45 caracteres')
-        elif 'Cannot add or update a child row: a foreign key constraint fails (`sm`.`login`, CONSTRAINT `Acces` FOREIGN KEY (`claveAcc`) REFERENCES `Acceso` (`claveAcc`))':
-            return render_template('regist.html', message='La clave de acceso no es correcta')
-        else:
-            return render_template('index.html', message=error_message)
+    return usuario_manager.userRegist()
 
 
 
 # Template del inbox para el departamento de fallas 
 @app.route("/inbox", methods=['GET'])
 def inbox():
-    cur = db.cursor()
-    cur.execute("SELECT tienda FROM usuarios_tiendas")
-    tiendas = cur.fetchall()
-    tiendas = [tienda[0] for tienda in tiendas]
-
-    cur.execute("SELECT * FROM odt")
-    fallas = cur.fetchall()
-    insertObject = []
-    columNamnes = [column[0] for column in cur.description]
-    for record in fallas:
-          insertObject.append(dict(zip(columNamnes, record)))
-    cur.close()
-    return render_template('inbox.html', fallas = insertObject, tiendas = tiendas)
+    return templates_manager.getInbox()
 
 
 # Agregar nueva falla
 @app.route("/new-falla-sambil", methods=['POST'])
 def newFallaSambil():
-    email = session['email']
-    tienda = request.form['tienda']
-    name = session['name']
-    surname = session['surname']
-    area = request.form['area']
-    tipo = request.form['tipo']
-    descripcion = request.form['descripcion']
-    fecha = request.form['fecha']
-
-    cur = db.cursor()
-    cur.execute("SELECT * FROM odt")
-    fallas = cur.fetchall()
-    insertObject = []
-    columNamnes = [column[0] for column in cur.description]
-    for record in fallas:
-          insertObject.append(dict(zip(columNamnes, record)))
-
-    cur.execute("SELECT tienda FROM usuarios_tiendas")
-    tiendas = cur.fetchall()
-    tiendas = [tienda[0] for tienda in tiendas]
-
-    if area == 'Selecciona un area':
-            return render_template('inbox.html', message='Debe seleccionar el area', fallas = insertObject, tiendas = tiendas)
-    elif tipo == 'Selecciona un tipo':
-            return render_template('inbox.html', message='Debe seleccionar el tipo', fallas = insertObject, tiendas = tiendas)
-    elif fecha == None:
-            return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject, tiendas = tiendas)
-
-    try:
-     if tienda and area and tipo and descripcion and fecha and tienda != 'Selecciona una tienda':
-         sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-         data = (email, name, surname, tienda, area, tipo, descripcion, fecha)
-         cur.execute(sql, data)
-         db.commit()
-         return redirect(url_for('inbox'))
-     else:
-         return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject, tiendas = tiendas)
-         
-         
-    except pymysql.Error as e:
-        if "Data too long for column 'descripcion'" in str(e):
-            return render_template('inbox.html', message='La descripcion tiene un maximo de 80 caracteres', fallas = insertObject, tiendas = tiendas)
-        else:
-            return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject, tiendas = tiendas)
+    return fallas_manager.newFallaSambil()
 
 
 # Funcion para buscar una falla filtrando por fecha
 @app.route("/date-filter", methods=['POST'])
 def dateFilter():
-    fecha1 = request.form['fecha-1']
-    fecha2 = request.form['fecha-2']
-    
-    cur = db.cursor()
-    if fecha1 and fecha2:
-        sql = "SELECT * FROM odt WHERE fecha BETWEEN %s AND %s"
-        data = (fecha1, fecha2)
-        cur.execute(sql, data)
-    else:
-        cur.execute("SELECT * FROM odt")
+    return fallas_manager.filtrarFecha()
 
-    fallas = cur.fetchall()
-    insertObject = []
-    columNamnes = [column[0] for column in cur.description]
-    for record in fallas:
-        insertObject.append(dict(zip(columNamnes, record)))
-    cur.close()
-
-    return render_template('inbox.html', fallas=insertObject)
+# Buscar fallas por nombre de tienda
 
 @app.route("/search", methods = ['POST'])
 def searchName():
-    tienda = request.form['tienda']
-    cur = db.cursor()
-    if tienda:
-        sql = 'SELECT * FROM odt WHERE tienda = %s' 
-        data = (tienda,)
-        cur.execute(sql, data)
-    else:
-        cur.execute("SELECT * FROM odt")
-        
-
-    fallas = cur.fetchall()
-    insertObject = []
-    columNamnes = [column[0] for column in cur.description]
-    for record in fallas:
-        insertObject.append(dict(zip(columNamnes, record)))
-    cur.close()
-
-    return render_template('inbox.html', fallas=insertObject)
+    return fallas_manager.filtrarNombre()
 
 
 
@@ -266,44 +107,7 @@ def searchName():
 
 @app.route("/edit-falla", methods=['POST'])
 def editFalla():
-    tienda = request.form['tienda']
-    name = request.form['name']
-    surname = request.form['surname']
-    area = request.form['area']
-    tipo = request.form['tipo']
-    descripcion = request.form['descripcion']
-    fecha = request.form['fecha']
-    idFalla = request.form['id']
-
-    cur = db.cursor()
-    cur.execute("SELECT * FROM odt")
-    fallas = cur.fetchall()
-    insertObject = []
-    columNamnes = [column[0] for column in cur.description]
-    for record in fallas:
-          insertObject.append(dict(zip(columNamnes, record)))
-
-    if area == 'Selecciona un area':
-            return render_template('inbox.html', message='Debe seleccionar el area', fallas = insertObject)
-    elif tipo == 'Selecciona un tipo':
-            return render_template('inbox.html', message='Debe seleccionar el tipo', fallas = insertObject)
-    elif fecha == None:
-            return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject)
-    
-    try:
-      if name and surname and tienda and area and tipo and descripcion and fecha:
-          cur = db.cursor()
-          sql = 'UPDATE odt SET name = %s, surname = %s, tienda = %s, area = %s, tipo = %s, descripcion = %s, fecha = %s WHERE id = %s'
-          data = (name, surname, tienda, area, tipo, descripcion, fecha, idFalla)
-          cur.execute(sql, data)
-          db.commit()
-          cur.close()
-          return redirect(url_for('inbox'))
-    except pymysql.Error as e:
-        if "Data too long for column 'descripcion'" in str(e):
-            return render_template('inbox.html', message='La descripcion tiene un maximo de 80 caracteres', fallas = insertObject)
-        else:
-            return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject)
+    return fallas_manager.editarFallas()
 
 
 
@@ -317,142 +121,34 @@ def editUser():
 # Funcion para editar usuarios del sambil
 @app.route("/edit-user", methods = ['POST'])
 def editUsers():
-    ID = session['id']
-    name = request.form['name']
-    surname = request.form['surname']
-    email = request.form['email']
-    contAct = request.form['contraseña_Act']
-    cont = request.form['contraseña']
-    cont_hash = generate_password_hash(cont, method='scrypt')
-    print(session['contraseña'])
-    if len(cont) > 12:
-        return render_template('editUser.html', message = 'La contraseña tiene un maximo de 12 caracteres')
-
-    try:
-        if name and surname and email:
-            if check_password_hash(session['contraseña'], contAct):
-                cur = db.cursor()
-                sql = "UPDATE login SET name = %s, surname = %s, email = %s, contraseña = %s WHERE id = %s"
-                data = (name, surname, email, cont_hash, ID)
-                cur.execute(sql, data)
-                db.commit()
-                return redirect(url_for('home'))
-            else:
-                return render_template('editUser.html', message="La contraseña es incorrecta")
-        else:
-            cur = db.cursor()
-            sql = "UPDATE login SET name = %s, surname = %s, email = %s WHERE id = %s"
-            data = (name, surname, email, ID)
-            cur.execute(sql, data)
-            db.commit()
-            cur.close()
-            return redirect(url_for('home'))
-    except pymysql.Error as e:
-        error_message = "Error de MySQL al ejecutar la consulta: {}".format(e)
-
-        if "Data too long for column 'name'" in str(e):
-            return render_template('editUser.html', message='El nombre tiene un máximo de 20 caracteres')
-        elif "Data too long for column 'surname'" in str(e):
-            return render_template('editUser.html', message='El apellido tiene un máximo de 25 caracteres')
-        elif "Data too long for column 'email'" in str(e):
-            return render_template('editUser.html', message='El email tiene un máximo de 45 caracteres')
-        else:
-            return render_template('index.html', message=error_message)
+    return usuario_manager.editSambilUser()
 
 # Template para la vista de reportes de fallas
 
 @app.route("/reporte-fallas", methods = ['GET'])
 def reporteFallas():
-    cur = db.cursor()
-    cur.execute("SELECT * FROM odt")
-    fallas = cur.fetchall()
-    insertObject = []
-    columNamnes = [column[0] for column in cur.description]
-    for record in fallas:
-          insertObject.append(dict(zip(columNamnes, record)))
-    cur.close()
-    return render_template('reporteFallas.html', fallas = insertObject)
+    return reportes_manager.mostrarReportes()
 
 # Template para la vista de reportes de tiendas registradas
 
 @app.route("/reporte-tiendas", methods = ['GET'])
 def reporteTiendas():
-    cur = db.cursor()
-    cur.execute("SELECT * FROM usuarios_tiendas")
-    tiendas = cur.fetchall()
-    insertObject = []
-    columNamnes = [column[0] for column in cur.description]
-    for record in tiendas:
-          insertObject.append(dict(zip(columNamnes, record)))
-    cur.close()
-
-    return render_template("reporteTiendas.html", tiendas = insertObject)
+    return reportes_manager.mostrarReportesTiendas()
 
 # Template para las tiendas
 @app.route("/tiendasUI", methods=['GET'])
 def tiendasUI():
-    email = session['email']
-    cur = db.cursor()
-    cur.execute("SELECT * FROM odt WHERE email = %s", [email])
-    fallas = cur.fetchall()
-
-    insertObject = []
-    columNamnes = [column[0] for column in cur.description]
-    for record in fallas:
-        insertObject.append(dict(zip(columNamnes, record)))
-    cur.close()
-    return render_template('tiendasUI.html', fallas = insertObject)
+    return templates_manager.getTiendasUI()
 
 
 
 # Agregar nueva falla
 @app.route("/new-falla", methods=['POST'])
 def newFalla():
-    email = session['email']
-    tienda = session['tienda']
-    name = session['name']
-    surname = session['surname']
-    area = request.form['area']
-    tipo = request.form['tipo']
-    descripcion = request.form['descripcion']
-    fecha = request.form['fecha']
-
-    cur = db.cursor()
-    cur.execute("SELECT * FROM odt WHERE email = %s", [email])
-    fallas = cur.fetchall()
-
-    insertObject = []
-    columNamnes = [column[0] for column in cur.description]
-    for record in fallas:
-        insertObject.append(dict(zip(columNamnes, record)))
-
-    if area == 'Selecciona un area':
-            return render_template('tiendasUI.html', message='Debe seleccionar el area', fallas = insertObject)
-    elif tipo == 'Selecciona un tipo':
-            return render_template('tiendasUI.html', message='Debe seleccionar el tipo', fallas = insertObject)
-    elif fecha == None:
-            return render_template('tiendasUI.html', message='Todos los campos son obligatorios', fallas = insertObject)
-
-    try:
-     if tienda and area and tipo and descripcion and fecha:
-         sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-         data = (email, name, surname, tienda, area, tipo, descripcion, fecha)
-         cur.execute(sql, data)
-         db.commit()
-         return redirect(url_for('tiendasUI'))
-     else:
-         return render_template('tiendasUI.html', message='Todos los campos son obligatorios', fallas = insertObject)
-         
-    except pymysql.Error as e:
-        if "Data too long for column 'descripcion'" in str(e):
-            return render_template('tiendasUI.html', message='La descripcion tiene un maximo de 80 caracteres', fallas = insertObject)
-        else:
-            return render_template('tiendasUI.html', message='Todos los campos son obligatorios', fallas = insertObject)
+    return fallas_manager.nuevaFallaTiendas()
 
 
-
-
-# Template para la gestiion de usuarios de las tiendas
+# Template para la gestion de usuarios de las tiendas
 @app.route("/editUserTiendas", methods=['GET'])
 def editUserTiendas():
     return render_template('editUserTiendas.html')
@@ -461,61 +157,12 @@ def editUserTiendas():
 # Funcion para editar usuarios de las tiendas
 @app.route("/edit-user-tiendas", methods=['POST'])
 def editUsersTiendasFunc():
-    idTiendas = session['id']
-    name = request.form['name']
-    surname = request.form['surname']
-    tienda = request.form['tienda']
-    email = request.form['email']
-    contAct = request.form['contraseña_Act']
-    cont = request.form['contraseña']
-    cont_hash = generate_password_hash(cont, method='scrypt')
-
-    if len(cont) > 12:
-        return render_template('editUserTiendas.html', message='La contraseña tiene un máximo de 12 caracteres')
-
-    try:
-        if name and surname and email and tienda:
-            cur = db.cursor()
-            if cont and contAct:
-                if check_password_hash(session['contraseña'], contAct):
-                    sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s, contraseña = %s WHERE idTiendas = %s"
-                    data = (name, surname, tienda, email, cont_hash, idTiendas)
-                else:
-                    return render_template('editUserTiendas.html', message="La contraseña es incorrecta")
-            else:
-                sql = "UPDATE usuarios_tiendas SET name = %s, surname = %s, tienda = %s, email = %s WHERE idTiendas = %s"
-                data = (name, surname, tienda, email, idTiendas)
-
-            cur.execute(sql, data)
-            db.commit()
-            cur.close()
-            return redirect(url_for('home'))
-        else:
-            return render_template('editUserTiendas.html', message="Todos los campos son obligatorios")
-    except pymysql.Error as e:
-        error_message = "Error de MySQL al ejecutar la consulta: {}".format(e)
-
-        if "Data too long for column 'name'" in str(e):
-            return render_template('editUserTiendas.html', message='El nombre tiene un máximo de 20 caracteres')
-        elif "Data too long for column 'surname'" in str(e):
-            return render_template('editUserTiendas.html', message='El apellido tiene un máximo de 25 caracteres')
-        elif "Data too long for column 'tienda'" in str(e):
-            return render_template('editUserTiendas.html', message='La tienda tiene un máximo de 25 caracteres')
-        elif "Data too long for column 'email'" in str(e):
-            return render_template('editUserTiendas.html', message='El email tiene un máximo de 45 caracteres')
-        else:
-            return render_template('index.html', message=error_message)
+        return usuario_manager.editUsersTiendasFunc()
         
 # Eliminar falla usuarios administradores
 @app.route("/delete-falla", methods=['POST'])
 def deleteFalla():
-    cur = db.cursor()
-    id = request.form['id']
-    sql = "DELETE FROM odt WHERE id = %s"
-    data = (id,)
-    cur.execute(sql, data)
-    db.commit()
-    return redirect(url_for('inbox'))
+     return fallas_manager.borrarFalla()
 
 
 # Template para olvidaste tu contrasena
@@ -524,48 +171,13 @@ def deleteFalla():
 def forgot():
     return render_template('forgotPassword.html')
 
-# Funcion para verificar si el usuario existe en la base de datos de usuarios sambil
-def verificar_email_en_bd(email):
-    cur = db.cursor()
-    cur.execute("SELECT * FROM login WHERE email = %s", (email,))
-    usuario = cur.fetchone()
-    cur.close()
-    return usuario is not None
 
-# Funcion para verificar si el usuario existe en la base de datos de usuarios tiendas
-def verificar_email_en_bd_tiendas(email):
-    cur = db.cursor()
-    cur.execute("SELECT * FROM usuarios_tiendas WHERE email = %s", (email,))
-    usuario = cur.fetchone()
-    cur.close()
-    return usuario is not None
 
 # Funcion para el envio del correo de recuperacion
 
 @app.route("/forgot-password", methods = ['POST'])
 def forgotPassword():
-    email = request.form['email']
-
-    if verificar_email_en_bd(email):
-        token = serializer.dumps(email, salt='reset-password')
-        reset_url = url_for('recovery', token=token, _external=True)
-        msg = Message('Restablecer contraseña',
-                      sender='tu_correo_electronico',
-                      recipients=[email])
-        msg.body = f'Para restablecer tu contraseña, haz clic en el siguiente enlace: {reset_url}'
-        mail.send(msg)
-        return render_template('forgotPassword.html', message_succes = 'REVISA TU GMAIL\n(Revisa tu bandeja de spam si no lo ves en el inbox)')
-    elif verificar_email_en_bd_tiendas(email):
-        token = serializer.dumps(email, salt='reset-password')
-        reset_url = url_for('recovery', token=token, _external=True)
-        msg = Message('Restablecer contraseña',
-                      sender='tu_correo_electronico',
-                      recipients=[email])
-        msg.body = f'Para restablecer tu contraseña, haz clic en el siguiente enlace: {reset_url}'
-        mail.send(msg)
-        return render_template('forgotPassword.html', message_succes = 'REVISA TU GMAIL\n(Revisa tu bandeja de spam si no lo ves en el inbox)')
-    else:
-        return render_template('forgotPassword.html', message = 'El correo electronico no esta registrado')
+    return mail_manager.envioCorreo()
     
 
 # Template de recuperacion de usuario
@@ -576,39 +188,14 @@ def recovery():
 # Funcion de recuperacion de usuario
 @app.route("/recovery-password", methods = ['POST'])
 def recoveryPassword():
-    email = request.form['email']
-    newPassword = request.form['newPassword']
-    confirmPassword = request.form['confirmPassword']
-    cont_hash = generate_password_hash(newPassword, method='scrypt')
-
-    if verificar_email_en_bd(email) and newPassword == confirmPassword:
-        cur = cur = db.cursor()
-        sql = "UPDATE login SET contraseña = %s WHERE email = %s"
-        data = (cont_hash, email)
-        cur.execute(sql, data)
-        db.commit()
-        cur.close()
-        return redirect(url_for('home'))
-    elif verificar_email_en_bd_tiendas(email) and newPassword == confirmPassword:
-        cur = db.cursor()
-        sql = "UPDATE usuarios_tiendas SET contraseña = %s WHERE email = %s"
-        data = (cont_hash, email)
-        cur.execute(sql, data)
-        db.commit()
-        cur.close()
-        return redirect(url_for('home'))
-    elif newPassword != confirmPassword:
-        return render_template('recovery.html', message = 'Las contraseña no coinciden')
-    else:
-        return render_template('recovery.html', message = 'El correo no esta registrado en la base de datos')
+    return mail_manager.recuperarCont()
 
 
 # Cierre de sesion
 @app.route("/logout")
 def logout():
-    session.clear()
-    return redirect(url_for('home'))
+    return usuario_manager.cierreSesion()
 
 
 if __name__ == "__main__":
-   app.run(debug=True, host="0.0.0.0", port=5000, threaded=True)
+    app.run(debug=True, host="0.0.0.0", port=5000, threaded=True)

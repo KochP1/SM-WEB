@@ -30,17 +30,17 @@
         </thead>
 
         <tbody>
-            {% for falla in fallas %}
+            {% for reporte in reportes %}
             <tr>
-                    <td class="td"> {{falla.id}} </d>
-                    <td class="td"> {{falla.email}} </td>
-                    <td class="td">{{falla.name}}</td>
-                    <td class="td">{{falla.surname}}</td>
-                    <td class="td">{{falla.tienda}}</td>
-                    <td class="td">{{falla.area}}</td>
-                    <td class="td">{{falla.tipo}}</td>
-                    <td class="td">{{falla.descripcion}}</t>
-                    <td class="td">{{falla.fecha}}</td>
+                    <td class="td"> {{reporte.id}} </d>
+                    <td class="td"> {{reporte.email}} </td>
+                    <td class="td">{{reporte.name}}</td>
+                    <td class="td">{{reporte.surname}}</td>
+                    <td class="td">{{reporte.tienda}}</td>
+                    <td class="td">{{reporte.area}}</td>
+                    <td class="td">{{reporte.tipo}}</td>
+                    <td class="td">{{reporte.descripcion}}</t>
+                    <td class="td">{{reporte.fecha}}</td>
             </tr>
             {% endfor %}
         </tbody>
