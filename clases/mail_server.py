@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template, redirect, request, session, url_for
+from flask import render_template, redirect, request, url_for
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
 import pymysql
