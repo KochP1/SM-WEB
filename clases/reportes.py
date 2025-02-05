@@ -21,7 +21,6 @@ class Reportes:
 
     def mostrarReportes(self):
         self.capturarReportes()
-        print(self.insertReportes)
         return render_template('reporteFallas.html', reportes = self.insertReportes)
     
     def generar_excel(self):
