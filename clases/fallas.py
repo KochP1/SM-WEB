@@ -14,6 +14,7 @@ class Falla:
         tipo = request.form['tipo']
         descripcion = request.form['descripcion']
         fecha = request.form['fecha']
+        estado = 'En ejecucion'
 
         cur = self.db.cursor()
         cur.execute("SELECT * FROM odt")
@@ -36,8 +37,8 @@ class Falla:
 
         try:
             if tienda and area and tipo and descripcion and fecha and tienda != 'Selecciona una tienda':
-                sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-                data = (email, name, surname, tienda, area, tipo, descripcion, fecha)
+                sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha, estado) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                data = (email, name, surname, tienda, area, tipo, descripcion, fecha, estado)
                 cur.execute(sql, data)
                 self.db.commit()
                 return redirect(url_for('inbox'))
@@ -152,35 +153,37 @@ class Falla:
         tipo = request.form['tipo']
         descripcion = request.form['descripcion']
         fecha = request.form['fecha']
+        estado = 'En ejecucion'
 
         cur = self.db.cursor()
-        cur.execute("SELECT * FROM odt WHERE email = %s", [email])
+        cur.execute("SELECT * FROM odt WHERE email = %s AND estado = %s", (email, estado))
         fallas = cur.fetchall()
 
         insertObject = []
-        columNamnes = [column[0] for column in cur.description]
+        columNames = [column[0] for column in cur.description]
         for record in fallas:
-            insertObject.append(dict(zip(columNamnes, record)))
+            insertObject.append(dict(zip(columNames, record)))
 
+        # Validaciones de los campos del formulario
         if area == 'Selecciona un area':
-            return render_template('tiendasUI.html', message='Debe seleccionar el area', fallas = insertObject)
+            return render_template('tiendasUI.html', message='Debe seleccionar el area', fallas=insertObject)
         elif tipo == 'Selecciona un tipo':
-            return render_template('tiendasUI.html', message='Debe seleccionar el tipo', fallas = insertObject)
-        elif fecha == None:
-            return render_template('tiendasUI.html', message='Todos los campos son obligatorios', fallas = insertObject)
+            return render_template('tiendasUI.html', message='Debe seleccionar el tipo', fallas=insertObject)
+        elif not fecha:
+            return render_template('tiendasUI.html', message='Todos los campos son obligatorios', fallas=insertObject)
 
         try:
             if tienda and area and tipo and descripcion and fecha:
-                sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
-                data = (email, name, surname, tienda, area, tipo, descripcion, fecha)
+                sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha, estado) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                data = (email, name, surname, tienda, area, tipo, descripcion, fecha, estado)
                 cur.execute(sql, data)
                 self.db.commit()
                 return redirect(url_for('tiendasUI'))
             else:
-               return render_template('tiendasUI.html', message='Todos los campos son obligatorios', fallas = insertObject)
-         
+                return render_template('tiendasUI.html', message='Todos los campos son obligatorios', fallas=insertObject)
+
         except pymysql.Error as e:
             if "Data too long for column 'descripcion'" in str(e):
-                return render_template('tiendasUI.html', message='La descripcion tiene un maximo de 80 caracteres', fallas = insertObject)
+                return render_template('tiendasUI.html', message='La descripcion tiene un maximo de 80 caracteres', fallas=insertObject)
             else:
-                return render_template('tiendasUI.html', message='Todos los campos son obligatorios', fallas = insertObject)
+                return render_template('tiendasUI.html', message='Error al insertar la falla', fallas=insertObject)

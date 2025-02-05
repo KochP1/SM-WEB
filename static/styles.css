@@ -161,6 +161,9 @@ span{
     font-family: "Roboto";
 }
 
+.logo_link{
+    margin-top: 15px;
+}
 
 .search-input{
     border-radius: 10px;
@@ -359,6 +362,16 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 .card-falla{
     background-color: transparent !important;
+}
+
+.btn-estado{
+    color: #3EB489;
+    border-color: #3EB489;
+}
+
+.btn-estado:hover{
+    background-color: #3EB489;
+    border-color: #3EB489;
 }
 
 /* reportes */
@@ -593,7 +606,16 @@ body.dark-mode {
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
+        align-items: center;
         margin-left: 20px;
+    }
+
+    .search-input{
+        margin-bottom: 15px;
+    }
+
+    .logo_link{
+        margin: auto;
     }
 
     .nav-list{

@@ -55,12 +55,18 @@
                             <label>Descripcion:</label>
                             {{falla.descripcion}}
                         </div>
+
+                        <div class="card-item item-mb">
+                            <label>Estado:</label>
+                            {{falla.estado}}
+                        </div>
                     </div>
 
                     <div class="card-footer d-flex justify-content-between">
                         {{falla.fecha}}
-                        <form action="/delete-falla" method="post">
-                            <input type="hidden" value="{{falla.id}}" name="id">
+                        <form action="/estado-falla" method="post">
+                            <input type="hidden" value="{{falla.id}}" name="id" class="input-id">
+                            <button type="submit" class="btn btn-outline-danger btn-estado btn-sm">Solucionar</button>
                         </form>
                     </div>
                 </div>

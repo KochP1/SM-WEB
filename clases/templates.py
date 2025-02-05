@@ -30,8 +30,9 @@ class Templates:
     
     def mostrarFallasTiendas(self):
         email = session['email']
+        estado = 'En ejecucion'
         cur = self.db.cursor()
-        cur.execute("SELECT * FROM odt WHERE email = %s", [email])
+        cur.execute("SELECT * FROM odt WHERE email = %s AND estado = %s", [email, estado])
         fallas_tiendas = cur.fetchall()
 
         self.insertObjectSesion = []
