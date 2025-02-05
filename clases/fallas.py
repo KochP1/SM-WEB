@@ -144,6 +144,8 @@ class Falla:
         self.db.commit()
         return redirect(url_for('inbox'))
     
+
+    
     def nuevaFallaTiendas(self):
         email = session['email']
         tienda = session['tienda']
@@ -186,4 +188,18 @@ class Falla:
             if "Data too long for column 'descripcion'" in str(e):
                 return render_template('tiendasUI.html', message='La descripcion tiene un maximo de 80 caracteres', fallas=insertObject)
             else:
+                print(e)
                 return render_template('tiendasUI.html', message='Error al insertar la falla', fallas=insertObject)
+    
+    def solucionarFalla(self):
+
+        estado = 'Solucionado'
+        id_falla = request.form['id']
+
+        cur = self.db.cursor()
+        sql = 'UPDATE odt SET estado = %s WHERE id = %s'
+        data = (estado, id_falla)
+        cur.execute(sql, data)
+        self.db.commit()
+        cur.close()
+        return redirect(url_for('tiendasUI'))

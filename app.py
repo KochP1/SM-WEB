@@ -152,6 +152,13 @@ def newFalla():
     return fallas_manager.nuevaFallaTiendas()
 
 
+# Solucionar una falla
+
+@app.route("/estado-falla", methods = ['POST'])
+def solucionar():
+    return fallas_manager.solucionarFalla()
+
+
 # Template para la gestion de usuarios de las tiendas
 @app.route("/editUserTiendas", methods=['GET'])
 def editUserTiendas():
