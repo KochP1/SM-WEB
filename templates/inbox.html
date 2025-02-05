@@ -52,7 +52,7 @@
                     <div class="card-body">
                         <div class="card-item">
                             <label>Encargado:</label>
-                            {{falla.name}} {{falla.surname}}
+                            {{falla.nombre}} {{falla.apellido}}
                         </div>
                         <div class="card-item item-area">
                             <label>Area:</label>
@@ -72,7 +72,7 @@
                             </p>
                         </div>
 
-                        <div class="card-item item-mb">
+                        <div class="card-item item-estado">
                             <label>Estado:</label>
                             {{falla.estado}}
                         </div>
@@ -215,6 +215,13 @@
     
                 <label>Fecha</label>
                 <input type="date" class="form-control mb-3" name="fecha" placeholder="yyyy-mm-dd" min="2025-01-01" id="fecha_edit">
+
+                <label>Selecciona el estado</label>
+                <select name="estado" class="form-control mb-3 select" id = "estado">
+                    <option value= "Selecciona un estado">Selecciona un estado</option>
+                    <option value="En ejecucion">En ejecucion</option>
+                    <option value="Solucionado">Solucionado</option>
+                </select>
     
                 <input type="hidden" class="input-id__modal" id="edit-id" name="id">
                 <button type="submit" class="btn btn-primary w-100 btn-fechas">Guardar</button>
@@ -421,9 +428,11 @@
                 const tipo = card.querySelector('.item-mb').innerText; // Ajustar el selector para el tipo
                 const descripcion = card.querySelector('.p__descripcion').textContent.trim(); 
                 const fecha = card.querySelector('.label-fecha').innerText;
+                const estado = card.querySelector('.item-estado').innerText;
                 const id = card.querySelector('.input-id').value;
 
                 console.log(fecha)
+                console.log(estado)
 
                 // Llenar los campos del modal con los datos
                 document.getElementById('name').value = name;
@@ -436,7 +445,7 @@
                 const areaSelect = document.getElementById('area');
                 for (let option of areaSelect.options) {
                 if (area.toLowerCase().includes(option.text.toLowerCase())) {
-                  option.selected = true;
+                option.selected = true;
     }
 }
 
@@ -447,13 +456,23 @@
                 option.selected = true;
     }
 }
-// Seleccionar la opción correcta en el campo de tipo
+// Seleccionar la opción correcta en el campo de tiendas
                 const tiendas = document.getElementById('tienda');
                 for (let option of tiendas.options) {
                 if (tienda.toLowerCase().includes(option.text.toLowerCase())) {
                 option.selected = true;
     }
 }
+
+// Seleccionar la opción correcta en el campo de estado
+                const selectEstados = document.getElementById('estado');
+                for (let option of selectEstados.options) {
+                if (estado.toLowerCase().includes(option.text.toLowerCase())) {
+                option.selected = true;
+    }
+}
+
+
             });
         });
     });

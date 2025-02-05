@@ -11,7 +11,7 @@ class Reportes:
     # Reportes de fallas
     def capturarReportes(self):
         cur = self.db.cursor()
-        cur.execute("SELECT * FROM odt")
+        cur.execute("SELECT nombre, apellido, tienda, area, tipo, descripcion, fecha, estado FROM odt")
         reportes = cur.fetchall()
         self.insertReportes = []
         columNamnes = [column[0] for column in cur.description]

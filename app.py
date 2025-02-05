@@ -173,7 +173,7 @@ def editUsersTiendasFunc():
 # Eliminar falla usuarios administradores
 @app.route("/delete-falla", methods=['POST'])
 def deleteFalla():
-     return fallas_manager.borrarFalla()
+        return fallas_manager.borrarFalla()
 
 
 # Template para olvidaste tu contrasena

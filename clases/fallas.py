@@ -37,7 +37,7 @@ class Falla:
 
         try:
             if tienda and area and tipo and descripcion and fecha and tienda != 'Selecciona una tienda':
-                sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha, estado) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                sql = "INSERT INTO odt (email, nombre, apellido, tienda, area, tipo, descripcion, fecha, estado) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
                 data = (email, name, surname, tienda, area, tipo, descripcion, fecha, estado)
                 cur.execute(sql, data)
                 self.db.commit()
@@ -102,6 +102,7 @@ class Falla:
         descripcion = request.form['descripcion']
         fecha = request.form['fecha']
         idFalla = request.form['id']
+        estado = request.form['estado']
 
         cur = self.db.cursor()
         cur.execute("SELECT * FROM odt")
@@ -117,12 +118,14 @@ class Falla:
             return render_template('inbox.html', message='Debe seleccionar el tipo', fallas = insertObject)
         elif fecha == None:
             return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject)
+        elif estado == "Selecciona un estado":
+            return render_template('inbox.html', message='Todos los campos son obligatorios', fallas = insertObject)
     
         try:
             if name and surname and tienda and area and tipo and descripcion and fecha:
                 cur = self.db.cursor()
-                sql = 'UPDATE odt SET name = %s, surname = %s, tienda = %s, area = %s, tipo = %s, descripcion = %s, fecha = %s WHERE id = %s'
-                data = (name, surname, tienda, area, tipo, descripcion, fecha, idFalla)
+                sql = 'UPDATE odt SET nombre = %s, apellido = %s, tienda = %s, area = %s, tipo = %s, descripcion = %s, fecha = %s, estado = %s WHERE id = %s'
+                data = (name, surname, tienda, area, tipo, descripcion, fecha, estado, idFalla)
                 cur.execute(sql, data)
                 self.db.commit()
                 cur.close()
@@ -176,7 +179,7 @@ class Falla:
 
         try:
             if tienda and area and tipo and descripcion and fecha:
-                sql = "INSERT INTO odt (email, name, surname, tienda, area, tipo, descripcion, fecha, estado) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                sql = "INSERT INTO odt (email, nombre, apellido, tienda, area, tipo, descripcion, fecha, estado) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
                 data = (email, name, surname, tienda, area, tipo, descripcion, fecha, estado)
                 cur.execute(sql, data)
                 self.db.commit()
