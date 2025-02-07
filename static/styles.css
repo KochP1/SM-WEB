@@ -375,8 +375,8 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .btn-estado:active{
-    background-color: #3EB489;
-    border-color: #3EB489;
+    background-color: #3EB489 !important;
+    border-color: #3EB489 !important;
 }
 
 /* reportes */
